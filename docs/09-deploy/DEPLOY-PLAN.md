@@ -84,6 +84,8 @@ o renombrar columnas) exige un `DROP` explícito en el script y un ADR.
 
 ## Preparación única en el VPS (una vez, a mano, con root)
 
+Automatizada en [`deploy/crear-bd.sh`](../../deploy/crear-bd.sh) (A3) y [`deploy/preparar-vps.sh`](../../deploy/preparar-vps.sh) (A4–A6). Los corre Jose: crear usuarios y permisos `sudo` en el servidor de producción es una decisión suya, no del agente. Detalle de lo que hacen:
+
 ```bash
 # 1. DNS: registro A curso-hfc.metadatape.com → IP del VPS (lo crea Jose en su proveedor)
 
