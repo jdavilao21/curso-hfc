@@ -1,0 +1,146 @@
+name: CI/CD
+
+# Único camino a producción (DEPLOY-PLAN §4): quality → e2e → deploy (SSH con comando forzado) → smoke.
+# Trigger `pull_request` (nunca `pull_request_target`): los PRs de forks no reciben secrets.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  quality:
+    name: Calidad (unitarias y sintaxis)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Dependencias de la API
+        run: pip install -r api/requirements.txt pytest
+      - name: Pruebas unitarias (auth)
+        run: cd api && python -m pytest -q
+      - name: Sintaxis Python
+        run: python -m py_compile api/*.py sql/semilla.py
+      - name: Sintaxis JavaScript del front
+        run: for f in web/js/*.js; do node --check "$f"; done
+      - name: Sin secretos en el repo
+        run: |
+          ! git grep -nIE '(PASSWORD|SECRET|CLAVE_[A-Z]+)=[^$ ]{6,}' -- ':!*.md' ':!.env.example' ':!.github/**'
+      - name: Auditoría de dependencias Python (informativa)
+        run: pip install pip-audit && pip-audit -r api/requirements.txt
+        continue-on-error: true
+
+  e2e:
+    name: Playwright E2E (SQL Server en contenedor)
+    needs: quality
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      mssql:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: 'Y'
+          MSSQL_SA_PASSWORD: Ci#SoloContenedor2026
+        ports: ['1433:1433']
+        options: >-
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'Ci#SoloContenedor2026' -C -Q 'SELECT 1'"
+          --health-interval 10s --health-timeout 5s --health-retries 15
+    # Claves de prueba solo válidas dentro de este contenedor efímero (no son las de producción).
+    env:
+      DB_SERVER: 127.0.0.1
+      DB_PORT: '1433'
+      DB_NAME: BD_CURSO_HFC
+      JWT_SECRET: ci-jwt-secret-solo-para-pruebas-0123456789abcdef
+      CLAVE_ADMIN: Admin#Ci2026
+      CLAVE_SUPERVISOR: Super#Ci2026
+      CLAVE_CLIENTE: Cliente#Ci2026
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Driver ODBC 18
+        run: |
+          if ! odbcinst -q -d | grep -q "ODBC Driver 18"; then
+            curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo tee /etc/apt/trusted.gpg.d/microsoft.asc >/dev/null
+            curl -fsSL https://packages.microsoft.com/config/ubuntu/24.04/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list
+            sudo apt-get update -q && sudo ACCEPT_EULA=Y apt-get install -yq msodbcsql18
+          fi
+      - run: pip install -r api/requirements.txt
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Crear BD y logins
+        run: |
+          docker exec -i ${{ job.services.mssql.id }} /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa \
+            -P 'Ci#SoloContenedor2026' -C -b -v CLAVE_APP='App#Ci2026x' CLAVE_CARGA='Carga#Ci2026x' < sql/01_crear_bd.sql
+      - name: Esquema y semilla
+        run: python sql/semilla.py
+        env:
+          DB_USER: curso_hfc_carga
+          DB_PASSWORD: Carga#Ci2026x
+      - name: Correr Playwright
+        run: npx playwright test
+        env:
+          CI: 'true'
+          PYTHON: python
+          DB_USER: curso_hfc_app
+          DB_PASSWORD: App#Ci2026x
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+  deploy:
+    name: Deploy al VPS
+    needs: e2e
+    # DEPLOY_ENABLED (variable del repo) se activa cuando el VPS está preparado (DEPLOY-PLAN §Preparación).
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment:
+      name: production
+      url: https://curso-hfc.metadatape.com
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    steps:
+      - name: Llave y host conocidos
+        run: |
+          install -m 700 -d ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519 && chmod 600 ~/.ssh/id_ed25519
+          echo "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+      - name: Desplegar (comando forzado en el servidor: deploy/desplegar.sh)
+        run: ssh -o BatchMode=yes deploy-curso@${{ secrets.DEPLOY_HOST }} "${{ github.sha }}"
+
+  smoke:
+    name: Smoke en producción
+    needs: deploy
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Salud, web y cabeceras
+        run: |
+          URL=https://curso-hfc.metadatape.com
+          curl -fsS $URL/api/health | grep -q '"ok":true'
+          curl -fsS $URL/ | grep -q '<title>HFC · Panel de Gestión</title>'
+          curl -fsSI $URL/ | grep -qi '^content-security-policy:'
+          test "$(curl -s -o /dev/null -w '%{http_code}' -X POST $URL/api/hfc-diario)" = 401

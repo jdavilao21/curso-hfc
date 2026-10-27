@@ -1,0 +1,22 @@
+# systemd: API del Panel HFC (demo del curso). Copiar a /etc/systemd/system/ y `systemctl enable --now curso-hfc-api`.
+# Corre con un usuario sin privilegios; las claves vienen de /etc/curso-hfc/api.env (chmod 600, nunca en git).
+[Unit]
+Description=Panel HFC (curso) - API FastAPI
+After=network.target
+
+[Service]
+User=curso-hfc
+Group=curso-hfc
+WorkingDirectory=/opt/curso-hfc/api
+EnvironmentFile=/etc/curso-hfc/api.env
+ExecStart=/opt/curso-hfc/venv/bin/uvicorn main:app --host 127.0.0.1 --port 8010 --workers 2 --proxy-headers --forwarded-allow-ips 127.0.0.1
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadOnlyPaths=/opt/curso-hfc
+
+[Install]
+WantedBy=multi-user.target

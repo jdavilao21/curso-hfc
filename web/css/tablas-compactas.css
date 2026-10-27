@@ -1,0 +1,27 @@
+/* ===================== Tablas compactas en todas las pestañas — 08-oct-2026 =====================
+   Pedido de Jose (08-oct-2026), tras revisar la tabla de Detalle TNPS: «todas las tablas, ¿puedes ajustarlas como lo
+   hiciste con la última?». Lleva a las tablas `table.datos` de Diario, Intervalos, Supervisores, Asesores y Horas el mismo
+   formato de css/tnps-detalle.css: filas de una línea más bajas, letra más chica, columnas más angostas y el símbolo ⇅ solo
+   en la columna ordenada. Las tablas de las ventanas (Oportunidades, Llamadas salientes) ya eran compactas y no cambian.
+   Ajuste 2 (Jose, 08-oct-2026: «súbele un poquito más el tamaño de fuente o ajusta un poquito más ancho»): letra de
+   11.5 a 12.5 px, encabezados de 10.5 a 11 px y un poco más de espacio entre columnas.
+   No aplica en Modo TV (body.tv-on), que a propósito usa letra grande para verse de lejos. */
+
+body:not(.tv-on) table.datos{font-size:12.5px}
+body:not(.tv-on) table.datos thead th{padding:8px 8px;font-size:11px;letter-spacing:.02em}
+body:not(.tv-on) table.datos tbody td{padding:3px 8px;font-size:12.5px;line-height:1.25}
+
+/* ⇅ solo en la columna ordenada (ocupaba ~12 px en cada encabezado) */
+body:not(.tv-on) table.datos thead th.sortable::after{content:none}
+body:not(.tv-on) table.datos thead th.sort-asc::after{content:'▲';margin-left:3px}
+body:not(.tv-on) table.datos thead th.sort-desc::after{content:'▼';margin-left:3px}
+
+/* semáforos y etiquetas dentro de las celdas, más chicos para no estirar la fila */
+body:not(.tv-on) table.datos .sv{padding:1px 7px;font-size:12px}
+body:not(.tv-on) table.datos .cond-badge{padding:1px 7px;font-size:11px;gap:3px}
+
+/* Detalle TNPS: misma letra, pero columnas algo más angostas para que siga entrando sin desplazamiento horizontal a
+   1366 px aun con 5 semanas (lo pidió Jose en el ajuste 3 de esa tabla). */
+body:not(.tv-on) table.datos.td-tbl thead th{padding:8px 5px}
+body:not(.tv-on) table.datos.td-tbl tbody td{padding:3px 5px}
+body:not(.tv-on) table.datos.td-tbl tbody td.td-nom{max-width:170px}

@@ -1,0 +1,12 @@
+{
+  "name": "curso-hfc",
+  "private": true,
+  "description": "Panel de Gestión HFC — proyecto integrador del curso Desarrollo AI-First con Claude",
+  "scripts": {
+    "test:e2e": "playwright test",
+    "test:api": "cd api && python -m pytest -q"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1"
+  }
+}

@@ -1,0 +1,739 @@
+/* ============================================================================
+   HFC — estilos base del panel (tema noche por defecto: Medianoche + Azul eléctrico).
+   Temas: noche = :root · día = body.day (acento rojo) · iOS = body.day.ios (css/tema-ios.css)
+          · neón = body.neon (css/tema-neon.css). Login: css/login-hfc.css. Tarjetas KPI: css/kpi-v2.css.
+
+   Orden del archivo (buscar el título para saltar a cada sección):
+     1. Variables de tema y base ........... :root / body.day
+     2. LOGIN ............................... contenedor de la pantalla de ingreso y mensaje de error
+     3. APP SHELL ........................... menú lateral, cabecera, título de pestaña, filtros, toggles,
+                                              tarjetas KPI, gráficos, donas, ventanas, tablas, navegación adaptable
+     4. MODO TV
+     5. TOOLTIPS DE FÓRMULAS y ajustes de HFC (marca de 3 letras, modo día en rojo)
+
+   Con «reducir movimiento» la regla general de abajo apaga toda animación y transición de los
+   elementos (!important); solo los pseudo-elementos (::before/::after) necesitan su propia regla.
+   ============================================================================ */
+
+:root{
+  --bg:#0e1220;        --surface:#151a2b;     --surface2:#1b2236;   --surface3:#222a41;
+  --border:#2d3651;    --text:#e7ebf5;        --muted:#8d97b3;      --dim:#5b6582;
+  --accent:#3b82f6;    --accent-ink:#60a5fa;  --accent2:#7c8aa5;    --accent2-ink:#a5b1c8;
+  --good:#6fae7d;       --good-bg:#1b2b20;
+  --warn:#d1a054;       --warn-bg:#332a17;
+  --bad:#c96a5e;         --bad-bg:#331d1a;
+  --shadow:0 20px 50px -12px rgba(0,0,0,.55);
+  --sans:'Inter','Segoe UI',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;
+  --mono:'Consolas','SFMono-Regular','Cascadia Mono',ui-monospace,monospace;
+  --r-sm:6px; --r-md:10px; --r-lg:16px; --r-pill:999px;
+}
+body.day{
+  --bg:#f1f4fa;        --surface:#ffffff;     --surface2:#e9eef7;   --surface3:#dfe6f2;
+  --border:#d1d9e8;    --text:#151a2b;        --muted:#55607a;      --dim:#8d97b3;
+  --accent:#d32f36;    --accent-ink:#b3232a;  --accent2:#56637d;    --accent2-ink:#414d66;
+  --good:#2f8055;       --good-bg:#e1f0e6;
+  --warn:#a8763a;       --warn-bg:#f3e6cf;
+  --bad:#b8564a;         --bad-bg:#f6e0dd;
+  --shadow:0 16px 40px -14px rgba(30,30,30,.18);
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);
+  -webkit-font-smoothing:antialiased;transition:background .25s ease,color .25s ease;
+}
+::selection{background:var(--accent);color:#1c130a}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
+::-webkit-scrollbar-track{background:transparent}
+a{color:var(--accent-ink)}
+button{font-family:inherit}
+:focus-visible{outline:2px solid var(--accent2);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ===================== LOGIN =====================
+   Contenedor de la pantalla de ingreso. La tarjeta, la ilustración y el formulario están en css/login-hfc.css.
+   El login va SIEMPRE en modo noche y en rojo: repite la paleta noche, así que los temas día / iOS / neón no lo afectan. */
+#pantalla-login{
+  color-scheme:dark;color:var(--text);
+  --bg:#0e1220;        --surface:#151a2b;     --surface2:#1b2236;   --surface3:#222a41;
+  --border:#2d3651;    --text:#e7ebf5;        --muted:#8d97b3;      --dim:#5b6582;
+  --accent:#3b82f6;    --accent-ink:#60a5fa;  --accent2:#7c8aa5;    --accent2-ink:#a5b1c8;
+  --bad:#c96a5e;       --bad-bg:#331d1a;      --shadow:0 20px 50px -12px rgba(0,0,0,.55);
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  padding:24px 18px;background:
+    radial-gradient(circle at 12% -10%, rgba(255,59,59,.12), transparent 45%),
+    radial-gradient(circle at 100% 110%, rgba(175,13,31,.14), transparent 50%),
+    var(--bg);
+}
+/* Mensaje de error del login (también lo usa js/sesion.js al cerrar una sesión). */
+.login-err{
+  margin-top:14px;padding:10px 14px;border-radius:var(--r-md);background:var(--bad-bg);
+  color:var(--bad);font-size:12.5px;display:none;border:1px solid rgba(201,106,94,.35);
+}
+.login-err.show{display:block}
+
+/* ===================== APP SHELL ===================== */
+#app{display:none;height:100vh;flex-direction:column}
+#app.on{display:flex}
+.sidebar{
+  position:relative;width:190px;flex:0 0 190px;background:var(--surface);border-right:1px solid var(--border);
+  padding:18px 12px;display:flex;flex-direction:column;gap:3px;overflow:visible;
+  transition:width .2s,flex-basis .2s;
+}
+.sb-sect{font-family:var(--mono);font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;padding:0 10px 10px}
+.sb-nav{display:flex;flex-direction:column;gap:3px}
+.sb-nav button{
+  position:relative;display:flex;align-items:center;gap:10px;text-align:left;background:transparent;
+  border:0;border-left:3px solid transparent;margin-left:-3px;
+  padding:10px 12px;border-radius:var(--r-md);color:var(--muted);font-size:12px;cursor:pointer;
+  transition:background .15s,color .15s,border-color .15s,transform .15s;
+}
+.sb-nav button:hover{background:var(--surface2);color:var(--text);transform:translateX(2px)}
+.sb-nav button.on{
+  background:linear-gradient(90deg,rgba(59,130,246,.16) 0%,transparent 88%);
+  color:var(--accent-ink);font-weight:700;border-left-color:var(--accent);
+}
+/* Punto pulsante junto al ítem activo — solo se nota de verdad en tema noche (glow sobre fondo oscuro) */
+.sb-nav button.on::after{
+  content:'';width:5px;height:5px;border-radius:50%;margin-left:auto;flex:0 0 auto;
+  background:var(--accent);box-shadow:0 0 6px var(--accent),0 0 13px rgba(59,130,246,.55);
+  animation:sbPulse 2.2s ease-in-out infinite;
+}
+@keyframes sbPulse{0%,100%{opacity:1}50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){.sb-nav button.on::after{animation:none}}
+.sb-nav button .ic{
+  width:24px;height:24px;border-radius:7px;background:var(--surface2);display:flex;align-items:center;justify-content:center;
+  flex:0 0 24px;color:var(--dim);transition:all .18s;
+}
+.sb-nav button:hover .ic{color:var(--text);transform:scale(1.06)}
+.sb-nav button.on .ic{background:var(--accent);color:#1c1006;box-shadow:0 0 10px rgba(59,130,246,.6),0 0 22px rgba(59,130,246,.3)}
+/* En tema día, el texto y los íconos del menú necesitan más contraste sobre el fondo claro. */
+body.day .sb-nav button:not(.on){color:var(--text);font-weight:600}
+body.day .sb-nav button .ic{color:var(--accent2-ink);border:1px solid var(--border)}
+body.day .sb-nav button:hover .ic{color:var(--text)}
+body.day .sb-nav button.on{
+  color:var(--accent-ink);
+  background:linear-gradient(90deg,rgba(211,47,54,.18),rgba(211,47,54,.05));
+}
+body.day .sb-nav button.on .ic{color:#1c1006;border-color:var(--accent);box-shadow:none}
+
+.main{flex:1;min-width:0;display:flex;flex-direction:column;overflow-y:auto}
+
+/* Header global (una sola vez, no por pestaña) — marca + usuario + tema */
+.app-header{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  padding:12px 26px;background:var(--surface);border-bottom:1px solid var(--border);
+}
+.app-header .ah-left{display:flex;align-items:center;gap:12px;min-width:0}
+.app-header .ah-brand{display:flex;align-items:center;gap:10px;font-size:13.5px;font-weight:800;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.app-header .ah-brand .mark{
+  width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;font:800 11px/1 var(--sans);color:#1c1006;flex:0 0 28px;
+}
+.app-header .ah-right{display:flex;align-items:center;gap:10px;flex:0 0 auto}
+/* Botón hamburguesa — contrae/expande el menú (en celular lo abre encima del contenido) */
+.btn-menu{
+  display:flex;align-items:center;justify-content:center;flex:0 0 34px;
+  width:34px;height:34px;border-radius:var(--r-pill);background:var(--surface2);
+  border:1px solid var(--border);color:var(--text);cursor:pointer;transition:border-color .15s,color .15s;
+}
+.btn-menu:hover{border-color:var(--accent);color:var(--accent-ink)}
+.btn-menu.on{border-color:var(--accent);color:var(--accent-ink)}
+.app-header .ah-user{font-size:12.5px;color:var(--text);font-weight:700}
+.badge-perfil{
+  font-family:var(--mono);font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+  padding:4px 10px;border-radius:var(--r-pill);background:var(--accent);color:#1c1006;
+}
+.tglTheme{
+  background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:var(--r-pill);
+  width:34px;height:34px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;
+  transition:border-color .15s,opacity .15s;
+}
+.tglTheme:hover{border-color:var(--accent)}
+/* Botones de header con ícono + texto (Actualizar / Salir) — más informativos que un ícono suelto */
+.btn-hdr{
+  display:flex;align-items:center;gap:7px;background:var(--surface2);border:1px solid var(--border);color:var(--text);
+  border-radius:var(--r-pill);padding:8px 15px;font-size:12.5px;font-weight:600;cursor:pointer;
+  transition:border-color .15s,color .15s;font-family:var(--sans);
+}
+.btn-hdr:hover{border-color:var(--accent);color:var(--accent-ink)}
+.btn-hdr:disabled{opacity:.6;cursor:default;border-color:var(--border);color:var(--text)}
+.btn-hdr svg{flex:0 0 auto}
+.btn-hdr.spin svg{animation:hdrSpin .8s linear infinite}
+@keyframes hdrSpin{to{transform:rotate(360deg)}}
+.btn-hdr.logout:hover{border-color:var(--bad);color:var(--bad)}
+
+.carga-estado{
+  display:flex;align-items:center;gap:12px;padding:10px 26px;background:var(--warn-bg);color:var(--warn);
+  font-size:12.5px;border-bottom:1px solid var(--border);
+}
+.carga-estado.err{background:var(--bad-bg);color:var(--bad)}
+.carga-estado .msg{flex:1}
+
+.content{padding:20px 26px 46px}
+.tab-pane{display:none}
+.tab-pane.on{display:block}
+
+/* Pill de título de pestaña (equivalente a .tab-title de ATC) — chip pequeño con punto pulsante */
+.tab-title{
+  font-family:var(--mono);font-size:14.5px;color:var(--text);font-weight:700;
+  text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r-pill);padding:7px 17px 7px 12px;
+}
+.tab-title::before{
+  content:'';width:7px;height:7px;border-radius:50%;flex-shrink:0;background:var(--accent);
+  box-shadow:0 0 8px var(--accent);animation:pulseDot 2.4s ease-in-out infinite;
+}
+@keyframes pulseDot{0%,100%{opacity:1}50%{opacity:.4}}
+.tab-title .tp{color:var(--accent-ink);font-weight:800;text-transform:none}
+.tab-title svg{flex:0 0 15px;opacity:.85}
+
+/* Fila de filtros — plana, en flujo normal (no dentro de una caja pesada) */
+.filtros{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.filtros label{font-family:var(--mono);font-size:13.5px;font-weight:700;color:var(--text)}
+/* Agrupa filtros afines dentro de la barra (ej. temporales / dimensiones / config) para que se
+   lean como bloques en vez de una fila larga sin cortes — cada grupo hereda gap/wrap de .filtros,
+   así que no hace falta una regla propia más que envolver. */
+.filtros-grp{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.filtro-sep{width:1px;align-self:stretch;min-height:22px;background:var(--border)}
+.chk-dia1{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;font-family:var(--mono);color:var(--text);cursor:pointer}
+.chk-dia1 input{accent-color:var(--accent)}
+select.ctl,input.ctl{
+  background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:var(--r-sm);
+  padding:7px 11px;font-size:14px;font-family:var(--mono);
+}
+/* Filtro activo (Jose, 2026-09-18: "que se muestre qué filtro estoy aplicando") — borde de acento
+   en los <select> que tienen un valor distinto de su default "Todos/Todas" (valor vacío). Se
+   activa/desactiva por JS (ej. _marcarFiltrosActivosAs(), js/14-asesores.js) comparando el valor
+   actual contra el default de cada filtro; no aplica a Período (siempre trae un período puntual
+   por diseño, no es un filtro "apagable") ni a Fecha (ya muestra su propio estado en el botón). */
+select.ctl.filtro-activo{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.dias-btn{
+  font-family:var(--mono);font-size:12px;padding:6px 12px;border-radius:var(--r-sm);
+  border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;
+}
+.dias-btn:hover{border-color:var(--accent);color:var(--accent-ink)}
+.dias-btn.on{background:var(--accent);border-color:var(--accent);color:#1c1006;font-weight:700}
+.dias-grp{display:flex;gap:4px;align-items:center;margin-left:4px}
+
+/* Toggle pill real (equivalente a .cuad-tgl de ATC) — cápsula con botones internos redondeados */
+.vista-tgl{display:inline-flex;background:var(--surface3);border-radius:var(--r-pill);padding:3px;border:1px solid var(--border)}
+.vista-tgl button{background:none;border:none;color:var(--muted);border-radius:var(--r-pill);padding:6px 15px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--sans)}
+.vista-tgl button.on{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#1c1006}
+
+/* Verde menos "chillón" que el neón original (#39ff14) — pedido de Jose (2026-09-14), se notaba
+   mal sobre todo en tema día. Mismo tono que usan los gráficos JS (17-retencion.js:_retColors). */
+
+/* %Tipif. (Solicitudes/Atendidas) — morado, distinto de cant/ret/noret para no confundirse con
+   el trío Gestión/Retenido/No Retenido (Jose, 2026-09-17). */
+
+/* Filas de #tbl-ret más compactas (Jose, 2026-09-14, señalando la fila de un asesor en una
+   captura: se veían muy altas) — escopado a esta tabla, no al resto del dashboard. */
+
+/* Tabla "Detalle por fecha" (pivote Resultado Final × Fecha) — valores centrados (el resto de
+   tablas del dashboard alinea a la derecha). La columna "Total" va al frente (ver JS), la fila
+   Total queda al final como en cualquier tabla normal. */
+
+/* Transición de los resultados cuando cambia una selección en los gráficos. */
+@keyframes retFlash{from{opacity:.72;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.ret-flash{animation:retFlash .35s ease-out}
+
+/* Ícono antepuesto al label (Jose, 2026-09-14, ronda 4: "como las del Diario... ícono, líneas y
+   variación") — .ret-tile .rt-l ya es flex (arriba); en las tarjetas sin ícono no cambia nada. */
+
+/* Sparkline sobre fondo de color sólido: trazo blanco (ver 19-reporte-cliente.js:_dibujarSparksRC,
+   no hay semáforo v/a/r que leer del texto acá) + chip de variación en píldora oscura translúcida
+   en vez del rojo/verde semántico del tema, para que se lea igual de bien sobre los 4 colores de
+   tarjeta sin competir con el fondo. Tamaño subido junto con .rt-p (Jose, 2026-09-14: "esto
+   ▲ +0.5% también" más grande) — sobreescribe el 9.5px genérico de `.spk-delta` (usado en Diario
+   sobre fondo apagado, acá sobre color sólido necesita más presencia). */
+
+/* stroke-width se define inline por instancia (ver gaugeCardHTML en 19-reporte-cliente.js, arco
+   más grueso a pedido de Jose 2026-09-14 ronda 2) — acá solo lo que es igual siempre. */
+
+/* Antes 9.5px + var(--muted) se leía apagado/chico contra el fondo de la tarjeta (Jose,
+   2026-09-14, ronda 3: "se vean un poco más, están opaco y muy pequeños en todos los gráficos"). */
+
+.kpi-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;margin-bottom:20px}
+.kpi-card{background:var(--surface);padding:13px 15px 11px;transition:background .12s}
+.kpi-card:hover{background:var(--surface2)}
+.kpi-card .kl{
+  font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;font-weight:700;
+  display:flex;align-items:center;gap:6px;font-family:var(--mono);
+}
+.kpi-card .ico{font-size:15px;line-height:1;flex:0 0 auto;opacity:.9}
+.kpi-card .kv{font-family:var(--mono);font-size:24px;font-weight:700;color:var(--text)}
+.kpi-card .kv.v{color:var(--good)}
+.kpi-card .kv.a{color:var(--warn)}
+.kpi-card .kv.r{color:var(--bad)}
+.kpi-card .kv.azul{color:var(--accent2-ink)}
+.kpi-card .kv.rojo{color:var(--bad)}
+.kpi-card .kv.verde{color:var(--good)}
+.kpi-card .kv.cat{color:var(--accent-ink)}
+.kpi-card .ks{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-top:5px;line-height:1.4}
+
+.kpi-card .ks b{color:var(--text);font-weight:700}
+
+/* Sparkline (equivalente a spk-* de ATC) */
+.spk-row{display:flex;align-items:center;gap:7px;margin-top:8px}
+.spk{flex:1;position:relative;height:24px;min-width:0}
+.spk-svg{width:100%;height:100%;display:block;overflow:visible}
+.spk-dot{
+  position:absolute;right:0;width:5px;height:5px;border-radius:50%;transform:translateY(-50%);
+  box-shadow:0 0 0 0 currentColor;animation:spkPulso 2.2s ease-out infinite;
+}
+@keyframes spkPulso{0%{box-shadow:0 0 0 0 rgba(59,130,246,.55)}70%{box-shadow:0 0 0 6px rgba(59,130,246,0)}100%{box-shadow:0 0 0 0 rgba(59,130,246,0)}}
+.spk-delta{flex:none;font-family:var(--mono);font-size:9.5px;font-weight:700;padding:2px 6px;border-radius:4px;white-space:nowrap}
+.spk-up{color:var(--good);background:var(--good-bg)}
+.spk-down{color:var(--bad);background:var(--bad-bg)}
+.spk-neutro{color:var(--muted);background:var(--surface3)}
+
+/* Chip de variación del popup "Comparativo vs. mes anterior" / Resumen acumulado (Jose,
+   2026-09-18: "la variación se ve muy pequeña... con fondo gris casi no se aprecia") — más grande
+   que el chip genérico de sparkline (que vive apretado junto a un ícono en una tarjeta chica) y
+   con el caso neutro (indicadores informativos, mejor:0 — Dimensionado/Recibidas/Q. Solicitudes/
+   %Var. Tráfico) resaltado con borde y texto de contraste normal en vez de gris sobre gris. */
+
+.charts-int-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin:0 0 20px}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:13px 15px;transition:transform .15s,box-shadow .15s}
+.chart-card:hover{transform:translateY(-2px);box-shadow:0 10px 26px -8px rgba(0,0,0,.4)}
+.chart-lbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;font-family:var(--mono)}
+.chart-canvas-wrap{position:relative;height:160px}
+
+/* Estado "filtrando" de la dona «Asesores por Estado» (Jose, 2026-09-17: "no se nota cuando esta activo el filtro") —
+   borde de color a la izquierda de la tarjeta + etiqueta animada junto al título, del color del segmento elegido
+   (--rcag-sel-color, lo fija renderDonaFiltro en js/20-agentes-comun.js). Las clases rcag-* conservan el nombre de
+   Reporte Cliente, de donde vino esta dona. */
+.rcag-donut-card{transition:transform .15s,box-shadow .3s ease,border-color .3s ease;border-left:3px solid transparent}
+.rcag-donut-card.filtrando{border-left-color:var(--rcag-sel-color,var(--accent));box-shadow:0 0 0 1px var(--rcag-sel-color,var(--accent)) inset}
+@keyframes rcagTagIn{from{opacity:0;transform:translateY(-3px) scale(.92)}to{opacity:1;transform:translateY(0) scale(1)}}
+/* Pill de color a medida (el estilo inline define background/color/border) — etiqueta de filtro de la dona. */
+.rcag-pill{
+  display:inline-flex;align-items:center;gap:4px;margin-left:6px;padding:2px 8px;border-radius:999px;
+  border:1px solid;font-weight:800;font-size:10.5px;letter-spacing:0;text-transform:none;
+  animation:rcagTagIn .25s ease-out;vertical-align:middle;white-space:nowrap;
+}
+.rcag-leyenda-fila{transition:opacity .25s ease,background .25s ease,box-shadow .25s ease}
+
+/* Destello al hacer clic en la dona (Jose: "no se nota que esté seleccionado") — anillo de color que aparece y se
+   desvanece en la tarjeta. renderDonaFiltro lo dispara solo cuando el filtro cambia. */
+@keyframes rcagFlash{
+  0%{box-shadow:0 0 0 0 var(--rcag-sel-color,var(--accent));transform:scale(1)}
+  30%{box-shadow:0 0 0 6px color-mix(in srgb,var(--rcag-sel-color,var(--accent)) 55%,transparent);transform:scale(1.012)}
+  100%{box-shadow:0 0 0 0 transparent;transform:scale(1)}
+}
+.rcag-flash{animation:rcagFlash .55s ease-out}
+
+/* "Análisis y hallazgos" — bullets generados desde los datos. */
+
+/* Gráficos ampliables — clic para abrir en modal grande (equivalente a ATC) */
+.chart-expandable{cursor:zoom-in;transition:border-color .15s}
+.chart-expandable:hover{border-color:var(--accent)!important}
+.cmo-expand-icon{font-size:10px;color:var(--muted);opacity:.7;float:right;margin-left:4px;user-select:none}
+#chart-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9900;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
+#chart-modal.open{display:flex}
+.cmo-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px 20px;width:86vw;max-width:1060px;height:74vh;max-height:calc(100vh - 48px);position:relative;display:flex;flex-direction:column;gap:10px;box-shadow:0 24px 64px rgba(0,0,0,.5);overflow:hidden}
+.cmo-header{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.cmo-title{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--accent-ink);flex:1}
+.cmo-hint{font-family:var(--mono);font-size:11px;color:var(--muted)}
+#btn-modal-labels{color:var(--text)}
+.cmo-close{background:none;border:1px solid var(--border);color:var(--dim);border-radius:6px;padding:3px 9px;cursor:pointer;font-size:14px;line-height:1;transition:all .15s}
+.cmo-close:hover{background:var(--border);color:var(--text)}
+.cmo-wrap{position:relative;flex:1 1 auto;min-height:0}
+
+/* Toolbar del modal "Gráfico de Cumplimiento" (28-grafico-cumplimiento.js): selector de KPI +
+   toggle Día actual/Hasta el día anterior, arriba del canvas. */
+.cmo-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:16px;flex:0 0 auto}
+.cmo-tb-grp{display:flex;align-items:center;gap:8px}
+.cmo-tb-lbl{font-family:var(--sans);font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+
+/* Overlay de modal reusable (equivalente genérico de #chart-modal) — para los modales propios
+   de Horas (Top10/Cond/Heatmap) que necesitan botones extra en la cabecera. */
+.co-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9900;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
+.co-modal.open{display:flex}
+
+/* Chips de series + Etiquetas del modal "Gráfico de Cumplimiento" */
+.cmo-sub{font-size:11px;color:var(--muted);font-weight:600;margin-left:4px}
+.cmo-chips{display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:0 0 auto}
+.cmo-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);background:var(--surface3);color:var(--muted);font:600 11.5px/1 var(--sans);padding:5px 10px;border-radius:var(--r-pill);cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+.cmo-chip i{width:8px;height:8px;border-radius:50%;background:var(--c)}
+.cmo-chip:hover{color:var(--text)}
+.cmo-chip.on{color:var(--text);border-color:var(--c);background:color-mix(in srgb,var(--c) 18%,transparent)}
+.cmo-chip-etq{margin-left:auto}
+
+/* Selectores del modal "Gráfico de Cumplimiento" (KPI y Fecha): al pasar el mouse se tiñen del color de acento
+   ANTES de hacer clic; el activo (.on) conserva su degradado y no cambia al pasar. */
+.cmo-toolbar .vista-tgl{gap:2px}
+.cmo-toolbar .vista-tgl button{transition:background .15s,color .15s,box-shadow .15s,transform .15s;border:1px solid transparent}
+.cmo-toolbar .vista-tgl button:not(.on):hover{background:color-mix(in srgb,var(--accent) 22%,transparent);color:var(--text);border-color:color-mix(in srgb,var(--accent) 55%,transparent);box-shadow:0 0 10px color-mix(in srgb,var(--accent) 30%,transparent);transform:translateY(-1px)}
+.cmo-toolbar .vista-tgl button:not(.on):active{transform:translateY(0);background:color-mix(in srgb,var(--accent) 34%,transparent)}
+.cmo-toolbar .vista-tgl button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.cmo-toolbar .vista-tgl button.on{box-shadow:0 0 12px color-mix(in srgb,var(--accent) 40%,transparent)}
+
+/* Modal "Descargar TNPS" — mismo patrón visual que el de ATC (modal-box con acento y franja de cabecera).
+   Fecha/Franja van lado a lado en grid, cada checkbox en su propia línea (no en chips que se amontonan con 30+ fechas). */
+.tnps-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9900;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
+.tnps-modal.open{display:flex}
+.tnps-modal-box{
+  background:var(--surface);border:1px solid rgba(59,130,246,.35);border-radius:var(--r-lg);
+  min-width:320px;max-width:520px;width:92vw;max-height:calc(100vh - 48px);overflow-y:auto;
+  box-shadow:0 0 0 1px rgba(59,130,246,.08),0 24px 64px rgba(0,0,0,.5);
+}
+.tnps-modal-hdr{
+  display:flex;align-items:center;justify-content:space-between;padding:14px 18px;
+  background:rgba(59,130,246,.08);border-bottom:1px solid rgba(59,130,246,.2);border-radius:var(--r-lg) var(--r-lg) 0 0;
+  font-size:13px;font-weight:700;color:var(--accent-ink);font-family:var(--mono);
+}
+.tnps-modal-close{
+  background:none;border:1px solid rgba(59,130,246,.25);cursor:pointer;color:var(--dim);
+  font-size:14px;padding:3px 8px;border-radius:6px;line-height:1;transition:all .15s;
+}
+.tnps-modal-close:hover{background:rgba(59,130,246,.12);color:var(--text);border-color:var(--accent)}
+.tnps-modal-body{padding:16px 18px}
+.tnps-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.tnps-row label{min-width:72px;font-size:11px;color:var(--dim);font-family:var(--mono);font-weight:700;letter-spacing:.03em}
+.tnps-row select{
+  flex:1;min-width:110px;padding:6px 9px;background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--r-sm);color:var(--text);font-size:12px;font-family:var(--mono);
+}
+.tnps-row select:focus{outline:none;border-color:var(--accent)}
+.tnps-check-section{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:6px}
+.tnps-check-hdr{font-size:10px;font-weight:700;color:var(--accent-ink);font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+.modal-check-wrap{
+  display:flex;flex-direction:column;gap:2px;max-height:150px;overflow-y:auto;
+  background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:7px 9px;
+}
+.modal-check-item{
+  display:flex;align-items:center;gap:6px;padding:3px 0;font-size:11.5px;color:var(--text);
+  cursor:pointer;white-space:nowrap;user-select:none;
+}
+.modal-check-item input{cursor:pointer;width:12px;height:12px;accent-color:var(--accent);flex-shrink:0}
+.modal-check-item.ck-all{
+  font-weight:700;color:var(--accent-ink);padding-bottom:5px;margin-bottom:3px;border-bottom:1px solid var(--border);
+}
+.tnps-modal-foot{
+  display:flex;align-items:center;gap:8px;justify-content:flex-end;padding:12px 18px 16px;
+  border-top:1px solid var(--border);
+}
+.tnps-modal-foot .cmo-hint{flex:1;text-align:left}
+
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden}
+.panel-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);gap:10px;flex-wrap:wrap}
+.panel-head h3{margin:0;font-size:13.5px;font-weight:700}
+.panel-head-left{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.panel-actions{display:flex;align-items:center;gap:8px}
+
+/* Panel "Columnas · KPIs" (10-columnas.js) — panel derecho único a toda la altura, con cabecera
+   fija y un solo desplazamiento. top/left con !important: le ganan a la posición en línea que
+   pone el JS al abrirlo. */
+.col-toggle-panel{
+  position:fixed;z-index:200;top:0!important;left:auto!important;right:0;width:min(360px,100vw);height:100dvh;max-height:none;
+  display:none;flex-direction:column;overflow:hidden;overscroll-behavior:auto;
+  background:var(--surface2);border:1px solid var(--border);border-radius:0;
+  box-shadow:0 16px 40px -10px rgba(0,0,0,.5);padding:0;
+}
+.col-toggle-panel.open{display:flex}
+.col-panel-head{flex:0 0 auto;padding:16px;border-bottom:1px solid var(--border)}
+.col-panel-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.col-panel-scroll{flex:1;min-height:0;overflow-y:auto;padding:8px 16px 20px;overscroll-behavior:auto}
+.col-toggle-hdr{font-size:12px;font-weight:700;color:var(--text)}
+.col-toggle-actions{display:flex;flex-wrap:wrap;gap:5px}
+.col-toggle-actions button{font-size:10px;padding:3px 8px}
+.col-toggle-item{display:flex;align-items:center;gap:8px;padding:5px 4px;font-size:12px;color:var(--text);cursor:pointer;border-radius:6px}
+.col-toggle-item:hover{background:var(--surface3)}
+.col-toggle-item input{accent-color:var(--accent)}
+.col-grp-hdr{
+  font-family:var(--mono);font-size:9.5px;color:var(--accent-ink);font-weight:700;text-transform:uppercase;
+  letter-spacing:.05em;margin:10px 0 4px;padding-bottom:3px;border-bottom:1px solid var(--border);
+}
+.col-grp-hdr:first-child{margin-top:0}
+.btn-export{
+  background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:var(--r-md);
+  padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:7px;
+}
+.btn-export:hover{border-color:var(--accent);color:var(--accent-ink)}
+
+.tbl-scroll{overflow-x:auto}
+table.datos{width:100%;border-collapse:collapse;font-size:14px;white-space:nowrap}
+table.datos thead th{
+  position:sticky;top:0;background:var(--surface2);color:var(--text);text-align:right;padding:10px 12px;
+  font-weight:700;font-size:12.5px;letter-spacing:.03em;text-transform:uppercase;border-bottom:1px solid var(--border);z-index:2;
+}
+table.datos thead th:first-child{text-align:left}
+table.datos thead th.sortable{cursor:pointer;user-select:none;transition:color .12s}
+table.datos thead th.sortable:hover{color:var(--accent-ink)}
+table.datos thead th.sortable::after{content:'⇅';margin-left:5px;opacity:.35;font-size:9px}
+table.datos thead th.sort-asc::after{content:'▲';opacity:1;color:var(--accent-ink)}
+table.datos thead th.sort-desc::after{content:'▼';opacity:1;color:var(--accent-ink)}
+table.datos thead th.has-fx{text-decoration:underline dotted var(--dim);text-underline-offset:3px;cursor:help}
+table.datos thead th.has-fx:hover{color:var(--accent-ink);text-decoration-color:var(--accent-ink)}
+table.datos tbody td{padding:8px 12px;text-align:right;border-bottom:1px solid var(--border);font-family:var(--mono)}
+table.datos tbody td:first-child{text-align:left;font-family:var(--sans);font-weight:600}
+table.datos tbody tr:hover td{background:var(--surface2)}
+table.datos tr.fila-total td{background:var(--surface2);font-weight:800;border-top:2px solid var(--accent)}
+
+/* Variante compacta — filas/columnas más angostas para tablas con muchas columnas (Reporte
+   Cliente · Agentes, Jose 2026-09-14: "ajustar el ancho de fila de la tabla"). */
+
+/* Tablas operativas: menos espacio por columna sin sacrificar la lectura de los valores. */
+
+.sv{padding:3px 9px;border-radius:var(--r-pill);font-weight:700;font-size:13.5px;display:inline-block}
+.sv.v{background:var(--good-bg);color:var(--good)}
+.sv.a{background:var(--warn-bg);color:var(--warn)}
+.sv.r{background:var(--bad-bg);color:var(--bad)}
+
+/* Resumen de Cond. Laboral (Asesores) — badges "FULL TIME: 83" etc., mismo espíritu que
+   los chips de ATC pero sin depender de una fuente de íconos externa. */
+.cond-resumen{display:flex;gap:8px;flex-wrap:wrap;margin:2px 0 14px}
+.cond-badge{
+  padding:5px 12px;border-radius:var(--r-pill);font-family:var(--mono);font-weight:700;font-size:12.5px;
+  border:1px solid; display:inline-flex;align-items:center;gap:5px;
+}
+.cond-badge.cb-ft{background:var(--good-bg);color:var(--good);border-color:var(--good)}
+.cond-badge.cb-mft{background:rgba(91,124,153,.16);color:var(--accent2-ink);border-color:var(--accent2)}
+.cond-badge.cb-pt{background:var(--warn-bg);color:var(--warn);border-color:var(--warn)}
+.cond-badge.cb-ojt{background:var(--bad-bg);color:var(--bad);border-color:var(--bad)}
+.cond-badge.cb-def{background:var(--surface2);color:var(--muted);border-color:var(--border)}
+.pos{color:var(--good)}
+.neg{color:var(--bad)}
+/* CUMPL. con colores propios más "encendidos" que el resto de la paleta (apagada a
+   propósito) — verde neón / rojo vivo, como lo tenía el panel viejo (hfc.md §3.7). */
+.estado{padding:4px 10px;border-radius:4px;font-weight:800;font-size:12px;letter-spacing:.04em;border:1px solid transparent}
+.estado.ap{background:rgba(57,255,20,.13);color:#39ff14;text-shadow:0 0 6px rgba(57,255,20,.55);border-color:rgba(57,255,20,.4)}
+.estado.des{background:rgba(255,59,59,.13);color:#ff3b3b;text-shadow:0 0 6px rgba(255,59,59,.4);border-color:rgba(255,59,59,.4)}
+body.day .estado.ap{color:#1e9e0e;text-shadow:none}
+body.day .estado.des{color:#d81f1f;text-shadow:none}
+
+/* Navegación adaptable */
+.app-layout{display:flex;flex:1;min-height:0;min-width:0;position:relative}
+.nav-compact .sidebar{width:60px;flex-basis:60px;padding:12px 8px}
+.nav-compact .sidebar .sb-sect,.nav-compact .sidebar .sb-label{display:none}
+.nav-compact .sb-nav button{justify-content:center;padding:9px 4px;gap:0}
+.nav-compact .sb-nav button.on::after{display:none}
+.nav-compact:not(.nav-keep-compact) .sidebar:hover,.nav-compact:not(.nav-keep-compact) .sidebar:focus-within{width:190px;flex-basis:190px;z-index:30;box-shadow:var(--shadow);padding:18px 12px}
+.nav-compact:not(.nav-keep-compact) .sidebar:hover .sb-label,.nav-compact:not(.nav-keep-compact) .sidebar:focus-within .sb-label{display:inline}
+.nav-compact:not(.nav-keep-compact) .sidebar:hover .sb-nav button,.nav-compact:not(.nav-keep-compact) .sidebar:focus-within .sb-nav button{justify-content:flex-start;gap:10px;padding:10px 12px}
+.nav-keep-compact .sb-nav button::before{content:attr(data-label);position:absolute;z-index:50;left:calc(100% + 8px);top:50%;transform:translateY(-50%);white-space:nowrap;background:var(--surface3);border:1px solid var(--border);border-radius:6px;padding:6px 9px;color:var(--text);box-shadow:var(--shadow);display:none;pointer-events:none}
+.nav-keep-compact .sb-nav button:hover::before,.nav-keep-compact .sb-nav button:focus-visible::before{display:block}
+.app-layout[data-position="right"] .sidebar{order:2;border-right:0;border-left:1px solid var(--border)}
+.app-layout[data-position="right"] .main{order:1}
+.app-layout[data-position="right"].nav-keep-compact .sb-nav button::before{left:auto;right:calc(100% + 8px)}
+.app-layout[data-position="top"],.app-layout[data-position="bottom"]{flex-direction:column}
+.app-layout[data-position="bottom"] .sidebar{order:2;border-top:1px solid var(--border)}
+.app-layout[data-position="bottom"] .main{order:1}
+.app-layout[data-position="top"] .sidebar,.app-layout[data-position="bottom"] .sidebar{width:100%;height:auto;flex:0 0 auto;padding:6px 12px;overflow-x:auto;overflow-y:visible;border-right:0;border-bottom:1px solid var(--border)}
+.app-layout[data-position="top"] .sb-sect,.app-layout[data-position="bottom"] .sb-sect{display:none}
+.app-layout[data-position="top"] .sb-nav,.app-layout[data-position="bottom"] .sb-nav{flex-direction:row;width:max-content;min-width:100%}
+.app-layout[data-position="top"] .sb-nav button,.app-layout[data-position="bottom"] .sb-nav button{white-space:nowrap;flex:0 0 auto}
+.app-layout[data-position="top"].nav-compact .sb-label,.app-layout[data-position="bottom"].nav-compact .sb-label{display:none}
+.app-layout[data-position="top"].nav-compact .sb-nav button,.app-layout[data-position="bottom"].nav-compact .sb-nav button{gap:0;padding:8px 12px}
+.app-layout[data-position="top"].nav-compact:not(.nav-keep-compact) .sidebar:hover .sb-label,.app-layout[data-position="bottom"].nav-compact:not(.nav-keep-compact) .sidebar:hover .sb-label{display:none}
+.app-layout[data-position="top"].nav-compact:not(.nav-keep-compact) .sidebar:focus-within .sb-label,.app-layout[data-position="bottom"].nav-compact:not(.nav-keep-compact) .sidebar:focus-within .sb-label{display:none}
+.app-layout[data-position="top"].nav-compact:not(.nav-keep-compact) .sidebar:hover .sb-nav button,.app-layout[data-position="bottom"].nav-compact:not(.nav-keep-compact) .sidebar:hover .sb-nav button{justify-content:center;gap:0;padding:8px 12px}
+.app-layout[data-position="top"].nav-compact:not(.nav-keep-compact) .sidebar:hover,.app-layout[data-position="bottom"].nav-compact:not(.nav-keep-compact) .sidebar:hover,.app-layout[data-position="top"].nav-compact:not(.nav-keep-compact) .sidebar:focus-within,.app-layout[data-position="bottom"].nav-compact:not(.nav-keep-compact) .sidebar:focus-within{width:100%;flex:0 0 auto;padding:6px 12px;box-shadow:none}
+.app-layout[data-position="top"].nav-keep-compact .sb-nav button::before,.app-layout[data-position="bottom"].nav-keep-compact .sb-nav button::before{display:none}
+.nav-settings-wrap{position:relative}
+.nav-settings{position:absolute;z-index:250;right:0;top:calc(100% + 8px);width:220px;padding:14px;display:grid;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow);font-size:12px}
+.nav-settings[hidden]{display:none}
+.nav-settings label{display:flex;align-items:center;gap:7px}
+@media (max-width:900px){
+  .content{padding:16px}
+  .app-header{padding:10px 14px;gap:8px}
+  .sidebar{position:relative;top:auto;bottom:auto;left:auto;z-index:1;box-shadow:none;width:56px;flex:0 0 56px;padding:8px 5px}
+  .sidebar .sb-sect,.sidebar .sb-label{display:none}
+  .sb-nav button{justify-content:center;padding:9px 3px;gap:0}
+  .sb-nav button.on::after{display:none}
+  .nav-compact:not(.nav-keep-compact) .sidebar:hover,.nav-compact:not(.nav-keep-compact) .sidebar:focus-within{width:56px;flex-basis:56px;padding:8px 5px;box-shadow:none}
+  .nav-compact:not(.nav-keep-compact) .sidebar:hover .sb-label,.nav-compact:not(.nav-keep-compact) .sidebar:focus-within .sb-label{display:none}
+  .app-layout[data-position="top"] .sidebar,.app-layout[data-position="bottom"] .sidebar{width:100%;padding:6px 8px}
+  .app-layout[data-position="left"].mobile-nav-open .sidebar,.app-layout[data-position="right"].mobile-nav-open .sidebar{position:absolute;top:0;bottom:0;width:190px;flex-basis:auto;z-index:80;padding:18px 12px;background:var(--surface);box-shadow:var(--shadow);overflow-y:auto}
+  .app-layout[data-position="left"].mobile-nav-open .sidebar{left:0;right:auto}
+  .app-layout[data-position="right"].mobile-nav-open .sidebar{right:0;left:auto}
+  .mobile-nav-open .sidebar .sb-sect,.mobile-nav-open .sidebar .sb-label{display:block}
+  .mobile-nav-open .sidebar .sb-nav button{justify-content:flex-start;gap:10px;padding:10px 12px}
+  .mobile-nav-open .sidebar .sb-nav button.on::after{display:block}
+}
+
+/* Selector de varias fechas */
+.fecha-multi{position:relative;min-width:145px}
+.fecha-multi-btn{width:100%;text-align:left;white-space:nowrap}
+.fecha-multi-btn:disabled{opacity:.55;cursor:not-allowed}
+.fecha-multi-list{position:absolute;z-index:100;top:calc(100% + 4px);left:0;min-width:190px;max-height:min(45vh,320px);overflow-y:auto;background:var(--surface2);border:1px solid var(--border);border-radius:9px;box-shadow:var(--shadow);padding:6px}
+.fecha-multi-list[hidden]{display:none}
+.fecha-multi-list label{display:flex;gap:8px;align-items:center;padding:6px;border-radius:5px;cursor:pointer;color:var(--text);white-space:nowrap}
+.fecha-multi-list label:hover{background:var(--surface3)}
+.fecha-multi-list input{accent-color:var(--accent)}
+
+@media (max-width:640px){
+  .ah-user{display:none}
+  .brand-sub{display:none}
+  .btn-hdr-txt{display:none}
+  .btn-hdr{padding:8px;gap:0}
+  .app-header{padding:8px 10px}
+  .content{padding:12px 10px 28px;min-width:0}
+  .tab-pane,.panel,.cmo-wrap{min-width:0}
+  .tab-title{max-width:100%;white-space:normal;line-height:1.4;padding:7px 11px;font-size:12px}
+  .filtros{gap:7px}
+  .filtros :is(select.ctl,input.ctl){max-width:100%}
+
+  .dias-grp{margin-left:0;flex-wrap:wrap}
+  .panel-head{padding:12px;align-items:flex-start}
+  .panel-head h3{line-height:1.4}
+  .panel-actions{max-width:100%;flex-wrap:wrap}
+  .tbl-scroll{-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+
+  .cmo-box{width:calc(100vw - 12px)!important;height:calc(100dvh - 12px)!important;max-height:none;padding:12px;border-radius:10px}
+  .cmo-header{flex-wrap:wrap}
+  .cmo-title{min-width:0;overflow-wrap:anywhere}
+  /* Ventanas ampliadas en celular (2026-09-25): título + ✕ en la primera fila y los botones debajo; antes el título
+     quedaba en una columna de sílabas (Top 10 de Horas). El aviso «Esc o clic fuera» no aplica en pantalla táctil. */
+  .cmo-header>.cmo-title{order:-2;flex:1 1 calc(100% - 50px)}
+  .cmo-title~.cmo-close{order:-1}
+  .cmo-header .cmo-hint{display:none}
+  .tnps-modal-box{min-width:0;width:calc(100vw - 16px);max-height:calc(100dvh - 16px)}
+  .tnps-modal-foot{flex-wrap:wrap;justify-content:flex-start}
+  .tnps-modal-foot .cmo-hint{flex-basis:100%}
+}
+@media (max-width:480px){
+  .badge-perfil{display:none}
+  .app-header .ah-right{gap:5px}
+  .app-header .ah-brand{font-size:12px;gap:5px}
+  .kpi-strip{grid-template-columns:1fr}
+
+  .charts-int-grid{grid-template-columns:1fr}
+  .tnps-check-section{grid-template-columns:1fr}
+}
+
+/* Ancho del contenido en monitores anchos. Era 87 %; el 09-oct-2026 Jose pidió «déjalo en 90 %», igual que RETE FIJA.
+   En tablet y celular (< 1100 px) usa todo el ancho disponible. */
+@media (min-width:1100px){
+  .tab-pane.on,.pie-area{max-width:90%;margin-left:auto;margin-right:auto}   /* el pie, al mismo ancho que la pestaña */
+}
+
+/* ===================== MODO TV ===================== */
+body.tv-on .sidebar,
+body.tv-on .app-header,
+body.tv-on .filtros,
+body.tv-on .tab-title,
+body.tv-on .btn-export,
+body.tv-on .panel-actions .dias-btn{display:none!important}
+body.tv-on .content{padding:52px 22px 18px}
+body.tv-on .kpi-strip{margin-bottom:20px}
+body.tv-on .kpi-card .kv{font-size:30px}
+body.tv-on .kpi-card .kl{font-size:11.5px;letter-spacing:.9px}
+body.tv-on .kpi-card .ks{font-size:12px}
+body.tv-on table.datos{font-size:15px}
+body.tv-on table.datos thead th{font-size:13px;padding:9px 12px}
+body.tv-on table.datos tbody td{padding:8px 12px}
+body.tv-on .tab-pane.on{animation:fadeIn .5s cubic-bezier(.2,.7,.3,1)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+#tv-bar{
+  position:fixed;top:0;left:0;right:0;height:44px;z-index:900;
+  display:flex;align-items:center;gap:14px;padding:0 18px;
+  background:linear-gradient(90deg,var(--surface2),var(--surface));
+  border-bottom:1px solid var(--border);font-family:var(--mono);
+}
+#tv-bar .tv-logo{font-size:15px;font-weight:800;color:var(--text);letter-spacing:1px}
+#tv-bar .tv-logo span{color:var(--accent-ink);font-weight:700;margin-left:4px}
+#tv-bar .tv-tab{
+  font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;
+  color:var(--accent-ink);padding:3px 10px;border:1px solid var(--border);border-radius:20px;
+}
+#tv-bar .tv-spacer{flex:1}
+#tv-bar .tv-reloj{font-size:17px;font-weight:700;color:var(--text);letter-spacing:1px}
+#tv-bar .tv-salir{
+  background:transparent;border:1px solid var(--border);color:var(--dim);
+  font-size:14px;padding:3px 10px;border-radius:6px;cursor:pointer;transition:all .15s;
+}
+#tv-bar .tv-salir:hover{color:var(--bad);border-color:var(--bad)}
+#tv-bar .tv-prog{position:absolute;left:0;bottom:0;height:2px;width:100%;background:var(--border)}
+#tv-bar .tv-prog i{display:block;height:100%;width:0;background:var(--accent);box-shadow:0 0 8px var(--accent)}
+@keyframes tvProg{from{width:0}to{width:100%}}
+
+/* ===================== TOOLTIPS DE FÓRMULAS (cabeceras de tabla) ===================== */
+.fx-tip{
+  position:fixed;z-index:99999;max-width:300px;pointer-events:none;
+  background:#14171c;border:1px solid var(--accent2);border-radius:9px;
+  padding:10px 13px;box-shadow:0 14px 32px rgba(0,0,0,.45);
+  opacity:0;transform:translateY(5px);transition:opacity .16s,transform .16s;
+}
+.fx-tip.show{opacity:1;transform:none}
+.fx-tip-t{font-size:11px;font-weight:700;color:var(--accent-ink);margin-bottom:5px;letter-spacing:.3px;font-family:var(--mono)}
+.fx-tip-f{font-size:12px;color:#e7ebf5;line-height:1.55;font-family:var(--sans)}
+.fx-tip-m{font-size:10.5px;color:#8d97b3;margin-top:5px;border-top:1px solid rgba(91,124,153,.25);padding-top:5px;font-family:var(--mono)}
+body.day .fx-tip{background:#f0f6fc;border-color:rgba(61,98,128,.4);box-shadow:0 14px 32px rgba(0,40,100,.18)}
+body.day .fx-tip-f{color:#151a2b}
+body.day .fx-tip-m{color:#55607a}
+
+/* Panel del asesor (2026-09-24): iframe a pantalla completa sobre todo el sistema. */
+#panel-asesor{position:fixed;inset:0;z-index:9000;background:#0e0e0e}
+#panel-asesor[hidden]{display:none}
+#pa-frame{border:0;width:100%;height:100%;display:block}
+#vc-buscar{width:100%;padding:9px 10px;font-size:13px}
+
+/* Cabecera: períodos registrados, «＋ Nuevo período» y formulario del nuevo período */
+
+/* Recuadro de estado del período */
+
+/* Tablas de indicadores y de llamadas por condición */
+
+/* Pie con estado y botones Guardar / Cancelar */
+
+/* PC con mouse: el botón de cada gráfico aparece en la esquina de la tarjeta al pasar el mouse, sin ocupar
+   lugar en el título (en el flujo alargaba algunas tarjetas una línea según el ancho de pantalla). */
+@media (hover:hover) and (pointer:fine){
+  .chart-card{position:relative}
+}
+/* Táctil: el botón queda en el título y se oculta la ayuda «· clic filtra…» para no alargar la tarjeta. */
+
+   /* sobre los modales (.co-modal 9900) */
+
+/* HFC (2026-10-08): la marca del encabezado lleva 3 letras («HFC») en vez de 2 («RF»). */
+.app-header .ah-brand .mark{font-size:9.5px;letter-spacing:-.03em}
+
+/* Modo día con acento rojo (Jose, 2026-10-08): el modo noche sigue en azul. Algunos resplandores fijos en azul
+   (rgba 59,130,246) se repintan acá en rojo para el día. */
+body.day:not(.ios) .tnps-modal-box{border-color:rgba(211,47,54,.35);box-shadow:0 0 0 1px rgba(211,47,54,.08),0 24px 64px rgba(0,0,0,.25)}
+body.day:not(.ios) .tnps-modal-hdr{background:rgba(211,47,54,.06);border-bottom-color:rgba(211,47,54,.2)}
+
+/* Texto blanco sobre el rojo del modo día (el texto oscuro original tenía poco contraste). */
+body.day:not(.ios) :is(.dias-btn.on,.badge-perfil,.vista-tgl button.on,.app-header .ah-brand .mark,.sb-nav button.on .ic){color:#fff}
+
+/* Nota bajo «Top 10 · concentración de detractores» (Asesores, 18-tnps-asesores.js). */
+.as-top-det-pie{margin-top:8px;font-size:11.5px;color:var(--muted);line-height:1.4}
+.cond-badge.cb-tnps-q2{background:rgba(79,143,214,.15);color:#4f8fd6;border-color:#4f8fd6}
+
+/* ===== Pie de página del área (Jose, 08-oct-2026: «quiero que mi área se venda») — visible en todas las pestañas ===== */
+.pie-area{margin-top:36px;padding:18px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:14px 24px;flex-wrap:wrap;
+  background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 7%,transparent),transparent 60%);border-radius:0 0 var(--r-lg) var(--r-lg)}
+.pie-marca{display:flex;align-items:center;gap:12px;min-width:0}
+.pie-logo{flex:0 0 auto;display:grid;place-items:center;width:42px;height:42px;border-radius:12px;font:800 13px/1 var(--sans);letter-spacing:.04em;color:#fff;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 6px 16px -6px color-mix(in srgb,var(--accent) 60%,transparent)}
+.pie-txt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.pie-txt b{font:700 14.5px/1.2 var(--sans);color:var(--text);letter-spacing:-.005em}
+.pie-txt span{font-size:12px;color:var(--muted)}
+.pie-der{font-size:11.5px;color:var(--muted);text-align:right}
+.pie-der b{color:var(--accent-ink)}
+body.neon .pie-txt b{text-shadow:0 0 10px rgba(255,43,214,.5)}
+@media (max-width:640px){ .pie-area{flex-direction:column;align-items:flex-start} .pie-der{text-align:left} }
+
+/* Botón «🎯 Oportunidades de migración» de Diario (la ventana tiene sus estilos en css/oport-atc.css) */
+.btn-oport{margin-right:8px;border-color:var(--accent)!important;color:var(--accent-ink)!important;font-weight:700}
+
+/* ===== Diario: clic en una fila filtra las tarjetas (js/23-filtro-fila-diario.js, 08-oct-2026) =====
+   Estilo «resaltado» de Power BI: la fila elegida queda marcada con el acento y las demás se atenúan. */
+#tbody-dia tr[data-fila]{cursor:pointer}
+#tbody-dia tr[data-fila]:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+#tbody-dia tr[data-fila] td{transition:opacity .25s ease-out,background-color .25s ease-out}
+#tbody-dia.xf-activo tr[data-fila]:not(.xf-sel) td{opacity:.42}
+#tbody-dia.xf-activo tr[data-fila]:not(.xf-sel):hover td{opacity:.75}
+#tbody-dia tr.xf-sel td{background:color-mix(in srgb,var(--accent) 16%,transparent)!important}
+#tbody-dia tr.xf-sel td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+.xf-chip{margin-right:8px;cursor:pointer;border-color:var(--accent);color:var(--accent-ink);animation:xfChip .3s ease-out}
+.xf-chip[hidden]{display:none}
+@keyframes xfChip{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}

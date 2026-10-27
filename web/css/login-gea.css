@@ -1,0 +1,223 @@
+/* ===================== LOGIN HFC v2 (08-oct-2026) =====================
+   Diseño de Inicio-de-sesion-GEA.zip (ChatGPT, React + Vite) pasado a HTML/CSS puro y conectado al login real.
+   Identidad GEA en rojo y negro (el login sigue en rojo por decisión de Jose). Escena con la mascota a la izquierda,
+   tarjeta del formulario a la derecha; en celular, la escena queda arriba y más baja.
+   Mejoras frente al original: sin React ni compilación, imagen de 54 KB (WebP) en vez de 1.1 MB, login real con
+   reacciones de la mascota (verificando, error, ingreso), aviso de Bloq Mayús, sin enlaces ni casillas de demostración,
+   firma de la Jefatura de Planificación y Métricas y «reducir movimiento». El fondo y .login-err vienen de estilos.css. */
+
+#pantalla-login{
+  padding:0;align-items:stretch;justify-content:stretch;font-family:'DM Sans',var(--sans);color:#f6f3f3;
+  background:
+    radial-gradient(circle at 83% 14%, rgba(225,24,45,.12), transparent 26%),
+    linear-gradient(135deg,#050505 0%,#101010 54%,#070707 100%);
+}
+#pantalla-login .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.gl-shell{
+  /* Formulario pegado a la escena y ambos centrados en la pantalla (Jose, 08-oct-2026: «más pegado al contenedor del bot»). */
+  --gl-form:440px; --gl-gap:6px;   /* 6 px: formulario pegado al bot; escena hasta 960 px de ancho (Jose, 08-oct-2026) */
+  width:100%;min-height:100vh;display:grid;grid-template-columns:minmax(420px,960px) var(--gl-form);column-gap:var(--gl-gap);
+  justify-content:center;padding:18px;box-sizing:border-box;
+  transition:grid-template-columns .6s cubic-bezier(.2,.8,.2,1),column-gap .6s cubic-bezier(.2,.8,.2,1);
+}
+/* Formulario oculto hasta el primer clic en el bot (Jose, 08-oct-2026). La columna mide 0 y se abre con transición. */
+.gl-shell.gl-cerrado{grid-template-columns:minmax(420px,960px) 0px;column-gap:0}
+.gl-shell.gl-cerrado .gl-lado,.gl-shell.gl-abriendo .gl-lado{overflow:hidden}
+.gl-shell.gl-cerrado .gl-card{visibility:hidden;opacity:0;transform:translateX(-60px) scale(.94)}
+.gl-shell.gl-abriendo .gl-card{animation:gl-card-entra .7s cubic-bezier(.2,.8,.2,1) both}
+.gl-shell.gl-cerrado .gl-burbuja{animation:gl-llamado 1.6s ease-in-out infinite}
+
+/* ---------- escena ---------- */
+.gl-scene{
+  --mx:0px; --my:0px;
+  position:relative;overflow:hidden;isolation:isolate;min-height:calc(100vh - 36px);box-sizing:border-box;
+  padding:clamp(36px,5vw,72px);border-radius:32px;
+  background:
+    radial-gradient(circle at 26% 18%, rgba(255,86,96,.2), transparent 30%),
+    radial-gradient(circle at 77% 72%, rgba(206,9,31,.24), transparent 36%),
+    linear-gradient(145deg,#2a0508 0%,#160608 43%,#080808 100%);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.06),0 24px 70px rgba(0,0,0,.48);
+}
+.gl-scene::after{
+  content:"";position:absolute;inset:0;z-index:-1;opacity:.3;
+  background-image:radial-gradient(#f03b4e 1px,transparent 1px);background-size:24px 24px;
+  -webkit-mask-image:linear-gradient(to bottom,#000,transparent 65%);mask-image:linear-gradient(to bottom,#000,transparent 65%);
+}
+.gl-copy{position:relative;z-index:4;max-width:540px}
+/* Jose, 08-oct-2026: «HFC · CLARO PERÚ» más grande, título un poco más chico y la descripción con efecto máquina de escribir */
+/* «HFC · CLARO PERÚ» del mismo tamaño que «Tu turno comienza aquí.» (Jose, 08-oct-2026) */
+.gl-eyebrow{display:block;color:#ff4b5e;font:800 clamp(34px,3.9vw,56px)/1.02 'Manrope',var(--sans);letter-spacing:-.02em}
+.gl-copy h1{margin:12px 0 10px;font:800 clamp(34px,3.9vw,56px)/1.02 'Manrope',var(--sans);letter-spacing:-.05em;color:#fff;text-shadow:0 10px 42px rgba(227,22,44,.24)}
+.gl-copy p{max-width:440px;margin:0;color:#c9bfc1;font-size:clamp(15px,1.3vw,18px);line-height:1.6}
+/* Máquina de escribir: lo escrito se ve, el resto ocupa su lugar invisible (no salta el diseño); cursor que parpadea */
+.gl-tw-resto{visibility:hidden}
+.gl-tw-cursor{display:inline-block;width:2px;height:1.05em;margin:0 1px -2px;background:#ff4b5e;animation:gl-cursor 1s steps(1) infinite}
+.gl-tw-cursor.fin{animation:gl-cursor 1s steps(1) 3 forwards}
+@keyframes gl-cursor{50%{opacity:0}100%{opacity:0}}
+.gl-pill{display:inline-flex;align-items:center;gap:8px;margin-top:22px;padding:9px 13px;border:1px solid rgba(255,255,255,.1);border-radius:999px;color:#e8dfe1;background:rgba(5,5,5,.48);backdrop-filter:blur(12px);font-size:13px;font-weight:700}
+.gl-pill svg,.gl-marca svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* Bot en su tamaño original (Jose, 08-oct-2026: «regresa el bot a su tamaño original»); 2 % abajo para que los anillos no toquen el borde */
+.gl-stage{position:absolute;inset:34% 0 2%;display:grid;place-items:center}
+/* Anillos medidos por el ALTO del escenario (no por el ancho) para que nunca se salgan por abajo de la escena
+   (Jose, 08-oct-2026: «chocan o se pierden en el margen inferior del contenedor»). */
+.gl-halo{position:absolute;border-radius:50%;border:1px solid rgba(244,49,68,.34);box-shadow:0 0 24px rgba(221,23,43,.09);aspect-ratio:1;width:auto;max-width:100%}
+.gl-halo-1{height:92%;animation:gl-orbita 14s linear infinite}
+.gl-halo-2{height:68%;border-style:dashed;animation:gl-orbita 10s linear infinite reverse}
+.gl-mascota{
+  position:relative;z-index:2;width:min(62%,500px);padding:0;border:0;background:transparent;cursor:pointer;
+  transform-origin:50% 65%;animation:gl-respira 3.8s ease-in-out infinite;-webkit-tap-highlight-color:transparent;
+}
+.gl-mascota img{
+  display:block;width:100%;height:auto;user-select:none;-webkit-user-drag:none;
+  transform:translate(var(--mx),var(--my));transition:transform .22s cubic-bezier(.2,.8,.2,1),filter .3s;
+  filter:drop-shadow(0 30px 34px rgba(0,0,0,.5)) drop-shadow(0 0 18px rgba(231,28,48,.13));
+}
+.gl-mascota:hover img{filter:drop-shadow(0 34px 38px rgba(0,0,0,.56)) drop-shadow(0 0 28px rgba(242,36,57,.3))}
+.gl-mascota:focus-visible{outline:3px solid #ff5264;outline-offset:9px;border-radius:28%}
+.gl-sombra{position:absolute;bottom:8%;width:44%;height:6%;border-radius:50%;background:rgba(0,0,0,.62);filter:blur(17px);animation:gl-sombra 3.8s ease-in-out infinite}
+.gl-burbuja{
+  position:absolute;right:7%;top:24%;z-index:4;max-width:290px;padding:12px 16px;border-radius:18px 18px 18px 4px;
+  border:1px solid rgba(255,104,118,.28);color:#fff;background:rgba(16,16,16,.78);backdrop-filter:blur(14px);
+  box-shadow:0 14px 34px rgba(0,0,0,.3),0 0 22px rgba(211,18,38,.12);font-weight:700;font-size:14px;line-height:1.35;
+  transform:rotate(2deg);transition:background .3s,border-color .3s;
+}
+
+/* estados (clase en .gl-scene, la pone js/login-mascota.js) */
+.gl-scene.st-user .gl-mascota{animation:gl-inclina .68s cubic-bezier(.2,.8,.2,1) both,gl-respira 3.2s ease-in-out .68s infinite}
+.gl-scene.st-pass .gl-mascota{animation:gl-escucha .8s ease both,gl-respira 3.5s ease-in-out .8s infinite}
+.gl-scene.st-verif .gl-mascota{animation:gl-respira 1.1s ease-in-out infinite}
+.gl-scene.st-ok .gl-mascota{animation:gl-celebra .9s cubic-bezier(.2,.8,.2,1) both}
+.gl-scene.st-ok .gl-burbuja{background:rgba(18,84,52,.84);border-color:rgba(83,220,145,.35)}
+.gl-scene.st-error .gl-mascota{animation:gl-niega .5s ease both}
+.gl-scene.st-error .gl-mascota img{filter:saturate(.68) drop-shadow(0 30px 34px rgba(0,0,0,.5))}
+.gl-scene.st-error .gl-burbuja{background:rgba(107,10,20,.88);border-color:rgba(255,91,105,.38)}
+/* acciones al hacer clic (prioridad sobre los estados) */
+.gl-mascota.ac-giro{animation:gl-giro 1.05s cubic-bezier(.2,.75,.25,1) both!important}
+.gl-mascota.ac-salto{animation:gl-salto .9s cubic-bezier(.2,.8,.2,1) both!important}
+.gl-mascota.ac-saludo{animation:gl-saludo 1.15s ease-in-out both!important}
+.gl-mascota.ac-baile{animation:gl-baile 1.35s ease-in-out both!important}
+.gl-mascota.ac-soporte{animation:gl-soporte 1.2s cubic-bezier(.2,.8,.2,1) both!important}
+.gl-card.ac-giro{animation:gl-card-giro .9s cubic-bezier(.2,.75,.25,1) both}
+.gl-card.ac-salto{animation:gl-card-salto .8s cubic-bezier(.2,.8,.2,1) both}
+.gl-card.ac-saludo{animation:gl-card-saludo 1s ease-in-out both}
+.gl-card.ac-baile{animation:gl-card-baile 1.1s ease-in-out both}
+.gl-card.ac-soporte{animation:gl-card-soporte 1.2s ease-in-out both}
+
+/* ---------- formulario ---------- */
+/* Tarjeta del mismo alto que la escena (Jose, 08-oct-2026: «¿ambos pueden estar al mismo tamaño?»): marca arriba, firma abajo. */
+.gl-lado{display:grid;justify-items:center;align-items:stretch;padding:0;min-width:0}
+.gl-card{
+  display:flex;flex-direction:column;
+  width:var(--gl-form);max-width:100%;box-sizing:border-box;padding:34px;border:1px solid rgba(255,255,255,.075);border-radius:28px;
+  background:rgba(17,17,17,.7);box-shadow:0 28px 80px rgba(0,0,0,.34);backdrop-filter:blur(18px);
+}
+/* «HFC · Panel de Gestión» más grande y la firma más chica (Jose, 08-oct-2026) */
+.gl-marca{display:flex;align-items:center;gap:11px;margin-bottom:24px;color:#ff3f52;font:800 clamp(24px,2.1vw,30px)/1.1 'Manrope',var(--sans);letter-spacing:-.02em}
+.gl-marca svg{width:28px;height:28px;flex:none}
+.gl-head{margin-top:auto}
+.gl-head span{color:#d95b67;font-size:11px;font-weight:800;letter-spacing:.18em}
+.gl-head h2{margin:10px 0 6px;font:800 clamp(32px,3.6vw,44px)/1.1 'Manrope',var(--sans);letter-spacing:-.045em;color:#fff}
+.gl-head p{margin:0 0 26px;color:#a99fa1;font-size:14.5px}
+
+.gl-field{display:block;margin-top:18px;color:#e9e3e4;font-size:14px;font-weight:700}
+.gl-ctl{
+  display:flex;align-items:center;gap:12px;margin-top:8px;padding:0 6px 0 15px;border:1px solid #373234;border-radius:15px;
+  background:#101010;color:#857a7c;transition:border-color .2s,box-shadow .2s,color .2s,transform .2s;
+}
+.gl-ctl > svg{width:19px;height:19px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.gl-ctl:focus-within{border-color:#e5253a;background:#151313;color:#ff4155;box-shadow:0 0 0 4px rgba(229,37,58,.13),0 10px 30px rgba(0,0,0,.2);transform:translateY(-1px)}
+.gl-ctl input{flex:1;min-width:0;height:52px;border:0;outline:0;background:transparent;color:#fff;font:500 15px 'DM Sans',var(--sans)}
+.gl-ctl input::placeholder{color:#6f6668;text-transform:none}
+.gl-ojo{display:grid;place-items:center;width:40px;height:40px;padding:0;border:0;border-radius:10px;color:#a59699;background:transparent;cursor:pointer}
+.gl-ojo:hover{color:#fff;background:rgba(255,255,255,.06)}
+.gl-ojo:focus-visible{outline:2px solid #ff5264;outline-offset:1px}
+.gl-ojo svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.gl-ojo[aria-pressed="true"]::after{content:"";position:absolute;width:22px;height:2px;background:currentColor;transform:rotate(-45deg);border-radius:2px}
+.gl-ojo{position:relative}
+.gl-mayus{display:block;margin-top:7px;color:#ffb36b;font-size:12px;font-weight:600}
+.gl-mayus[hidden]{display:none}
+
+.gl-btn{
+  width:100%;height:54px;margin-top:24px;display:flex;align-items:center;justify-content:center;gap:12px;border:0;border-radius:15px;
+  color:#fff;background:linear-gradient(135deg,#f12d42,#a9081b);box-shadow:0 15px 34px rgba(211,17,38,.3);
+  font:800 15px 'DM Sans',var(--sans);cursor:pointer;transition:transform .2s,box-shadow .2s,opacity .2s;
+}
+.gl-btn::after{content:"→";font-size:20px;transition:transform .2s}
+.gl-btn:hover{transform:translateY(-2px);box-shadow:0 19px 40px rgba(229,29,49,.38)}
+.gl-btn:hover::after{transform:translateX(3px)}
+.gl-btn:active{transform:translateY(0)}
+.gl-btn:focus-visible{outline:3px solid #ffb3bb;outline-offset:3px}
+.gl-btn:disabled{opacity:.7;cursor:wait;transform:none}
+.gl-btn:disabled::after{content:"";width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:gl-orbita .8s linear infinite}
+#pantalla-login .login-err{border-radius:12px;background:rgba(107,10,20,.55);border-color:rgba(255,91,105,.38);color:#ff9aa5;font-size:13px}
+.gl-nota{margin:16px 0 18px;color:#8f8587;font-size:12.5px;line-height:1.5;text-align:center}
+
+/* Firma sin tarjeta y centrada en el ancho del formulario (Jose, 08-oct-2026) */
+.gl-firma{display:flex;align-items:center;justify-content:center;gap:9px;margin-top:auto;padding:0;border:0;background:none;align-self:center;max-width:100%;box-sizing:border-box}
+.gl-firma-logo{display:grid;place-items:center;width:30px;height:30px;flex:none;border-radius:8px;background:#fff;color:#b5162a;font:800 9.5px 'Manrope',var(--sans);letter-spacing:.04em}
+.gl-firma-txt{display:flex;flex-direction:column;gap:1px;min-width:0}
+.gl-firma-txt small{color:#a99fa1;font-size:9.5px}
+.gl-firma-txt b{color:#fff;font:800 12px 'Manrope',var(--sans);letter-spacing:-.01em}
+
+/* ---------- animaciones ---------- */
+@keyframes gl-orbita{to{transform:rotate(360deg)}}
+@keyframes gl-card-entra{0%{opacity:0;transform:translateX(-60px) scale(.94)}100%{opacity:1;transform:none}}
+@keyframes gl-llamado{0%,100%{transform:rotate(2deg) translateY(0)}50%{transform:rotate(-1deg) translateY(-6px)}}
+/* animaciones de la tarjeta en los clics siguientes (una por cada acción del bot) */
+@keyframes gl-card-giro{0%,100%{transform:none}40%{transform:perspective(900px) rotateY(-10deg)}75%{transform:perspective(900px) rotateY(4deg)}}
+@keyframes gl-card-salto{0%,100%{transform:none}35%{transform:translateY(-16px)}65%{transform:translateY(3px)}}
+@keyframes gl-card-saludo{0%,100%{transform:none}20%{transform:rotate(-1.6deg)}45%{transform:rotate(1.4deg)}70%{transform:rotate(-.8deg)}}
+@keyframes gl-card-baile{0%,100%{transform:none}25%{transform:translateX(-10px) rotate(-1deg)}50%{transform:translateX(9px) rotate(1deg)}75%{transform:translateX(-5px)}}
+@keyframes gl-card-soporte{0%,100%{box-shadow:0 28px 80px rgba(0,0,0,.34)}45%{box-shadow:0 28px 80px rgba(0,0,0,.34),0 0 0 2px rgba(241,45,66,.55),0 0 46px rgba(241,45,66,.35)}}
+@keyframes gl-sombra{0%,100%{transform:scale(1);opacity:.65}50%{transform:scale(.86);opacity:.38}}
+@keyframes gl-respira{0%,100%{transform:translateY(0) scale(1) rotate(-.4deg)}50%{transform:translateY(-10px) scale(1.015) rotate(.5deg)}}
+@keyframes gl-inclina{0%{transform:translateX(0) rotate(0)}60%{transform:translateX(24px) translateY(-8px) rotate(2.2deg) scale(1.025)}100%{transform:translateX(18px) translateY(-5px) rotate(1.4deg)}}
+@keyframes gl-escucha{0%{transform:rotate(0) scale(1)}45%{transform:translateY(-10px) rotate(-3deg) scale(.985)}75%{transform:translateY(-4px) rotate(1.5deg) scale(.99)}100%{transform:rotate(-1deg) scale(.99)}}
+@keyframes gl-celebra{0%{transform:translateY(0) rotate(0) scale(1)}35%{transform:translateY(-48px) rotate(5deg) scale(1.045)}58%{transform:translateY(-18px) rotate(-3deg) scale(1.02)}78%{transform:translateY(-30px) rotate(2deg) scale(1.03)}100%{transform:translateY(0) rotate(0) scale(1)}}
+@keyframes gl-niega{0%,100%{transform:translateX(0) rotate(0)}20%{transform:translateX(-14px) rotate(-2deg)}40%{transform:translateX(12px) rotate(2deg)}60%{transform:translateX(-8px) rotate(-1deg)}80%{transform:translateX(5px) rotate(.6deg)}}
+@keyframes gl-giro{0%{transform:rotate(0) scale(1)}42%{transform:rotate(190deg) scale(.88)}78%{transform:rotate(380deg) scale(1.08)}100%{transform:rotate(360deg) scale(1)}}
+@keyframes gl-salto{0%,100%{transform:translateY(0) scale(1)}18%{transform:translateY(8px) scale(1.06,.92)}48%{transform:translateY(-76px) rotate(-5deg) scale(.96,1.06)}72%{transform:translateY(4px) scale(1.07,.93)}}
+@keyframes gl-saludo{0%,100%{transform:rotate(0) translateX(0)}20%{transform:rotate(-7deg) translateX(-8px)}40%{transform:rotate(8deg) translateX(8px)}60%{transform:rotate(-6deg) translateX(-5px)}80%{transform:rotate(4deg) translateX(3px)}}
+@keyframes gl-baile{0%,100%{transform:translate(0,0) rotate(0) scale(1)}16%{transform:translate(-22px,-14px) rotate(-8deg) scale(1.03)}32%{transform:translate(20px,-4px) rotate(7deg) scale(.98)}48%{transform:translate(-16px,-24px) rotate(-5deg) scale(1.04)}64%{transform:translate(18px,-8px) rotate(8deg) scale(.98)}82%{transform:translate(-7px,-15px) rotate(-3deg) scale(1.02)}}
+@keyframes gl-soporte{0%,100%{transform:translateY(0) rotate(0) scale(1)}28%{transform:translateY(-15px) rotate(-4deg) scale(1.035)}52%{transform:translateY(-8px) rotate(4deg) scale(1.02)}74%{transform:translateY(-17px) rotate(-2deg) scale(1.04)}}
+
+/* Escritorio: el escenario ocupa el espacio que queda DEBAJO del texto (fila 1fr) y el bot se mide por ese alto, así nunca
+   se cruza con el texto aunque el título crezca o la pantalla sea baja (Jose, 08-oct-2026). Tope: su tamaño original (≈500 px). */
+@media (min-width:901px){
+  .gl-scene{display:grid;grid-template-rows:auto minmax(200px,1fr);height:max(600px,calc(100vh - 36px));overflow:clip;padding-bottom:22px}
+  /* container-type:size: el escenario no crece por su contenido y el bot se mide con cqh/cqw (alto/ancho del escenario) */
+  .gl-stage{position:relative;inset:auto;margin:-46px 0 0;min-height:0;container-type:size}   /* sube junto a «Asistente virtual GEA» (a la derecha no hay texto) */
+  .gl-mascota{width:min(62cqw,500px,calc(88cqh * 1.18));height:auto}
+}
+
+/* ---------- responsive ---------- */
+@media (max-width:900px){
+  .gl-shell,.gl-shell.gl-cerrado{grid-template-columns:1fr;column-gap:0;padding:0;justify-content:stretch}
+  .gl-shell.gl-cerrado .gl-lado{display:none}
+  .gl-scene{height:auto;min-height:440px;border-radius:0 0 32px 32px;padding:30px 24px}
+  .gl-copy h1,.gl-eyebrow{font-size:36px}
+  .gl-copy p{max-width:340px;font-size:15px}
+  .gl-stage{inset:30% 3% 4% 46%}   /* escenario en la mitad derecha: bot y anillos centrados entre sí */
+  .gl-mascota{width:min(88%,300px)}
+  .gl-burbuja{left:auto;right:calc(100% - 6px);top:56%;width:max-content}   /* a la izquierda del bot */
+  .gl-sombra{width:60%;bottom:4%}
+  .gl-lado{padding:32px 18px 44px}
+  .gl-card{width:min(100%,var(--gl-form))}
+  .gl-head{margin-top:0}
+  .gl-firma{margin-top:22px}
+}
+@media (max-width:520px){
+  .gl-scene{min-height:460px}
+  .gl-copy h1,.gl-eyebrow{font-size:30px}
+  .gl-copy p{max-width:250px}
+  .gl-pill{margin-top:14px}
+  .gl-stage{inset:52% 2% 3% 40%}
+  .gl-mascota{width:96%}
+  .gl-burbuja{top:40%;font-size:12px;padding:9px 12px;max-width:140px}
+  .gl-card{padding:26px 20px}
+}
+@media (prefers-reduced-motion:reduce){
+  #pantalla-login *,#pantalla-login *::before,#pantalla-login *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  .gl-mascota img{transform:none}
+}

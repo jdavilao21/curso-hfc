@@ -1,0 +1,15 @@
+schema: spec-driven
+
+context: |
+  Panel de Gestión HFC (demo del curso). Front estático en web/ (HTML + JS numerado, sin build,
+  Chart.js y xlsx-js-style por CDN con SRI). API FastAPI + pyodbc en api/. SQL Server, base BD_CURSO_HFC (sql/).
+  Tests: pytest en api/tests, Playwright en tests/. Idioma de código, comentarios y docs: español.
+  Leer docs/01-producto/PRD.md (alcance y no alcance) y docs/03-arquitectura/TECH-DESIGN.md antes de proponer.
+
+rules:
+  proposal:
+    - Citar el ítem del backlog y los ADRs que aplica
+  design:
+    - Registrar supuestos no confirmados en una sección Assumptions
+  tasks:
+    - Terminar siempre con un grupo de Verificación (pytest y/o Playwright)

@@ -1,0 +1,92 @@
+/* ===================== Tema «Neón» (HFC, 2026-10-08) =====================
+   Cuarto tema (noche → día → iOS → neón). Oscuro casi negro con magenta y cian brillantes, resplandores en bordes,
+   cifras y menú, fondo con cuadrícula tenue tipo synthwave y títulos en Orbitron. Se activa con body.neon (sin .day).
+   Los colores de las metas pasan a sus versiones neón: verde, amarillo y rosa-rojo. */
+body.neon{
+  --bg:#07060f;      --surface:#0e0c1d;  --surface2:#151231;  --surface3:#1d1940;
+  --border:#2b2560;  --text:#f1eeff;     --muted:#a59fd0;     --dim:#6c66a0;
+  --accent:#ff2bd6;  --accent-ink:#ff6be6; --accent2:#00e5ff; --accent2-ink:#5ff3ff;
+  --good:#39ff88;    --good-bg:rgba(57,255,136,.10);
+  --warn:#ffe14d;    --warn-bg:rgba(255,225,77,.10);
+  --bad:#ff3d6e;     --bad-bg:rgba(255,61,110,.12);
+  --neon-m:255,43,214; --neon-c:0,229,255;
+  --shadow:0 0 0 1px rgba(var(--neon-c),.08),0 20px 50px -12px rgba(0,0,0,.8);
+  --tit:'Orbitron','Inter',system-ui,sans-serif;
+  background-color:var(--bg);color:var(--text);
+  background-image:
+    radial-gradient(circle at 10% -10%, rgba(var(--neon-m),.16), transparent 40%),
+    radial-gradient(circle at 110% 110%, rgba(var(--neon-c),.12), transparent 45%),
+    linear-gradient(rgba(var(--neon-c),.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--neon-m),.035) 1px, transparent 1px);
+  background-size:auto,auto,44px 44px,44px 44px;background-attachment:fixed;
+}
+body.neon ::selection{background:rgba(var(--neon-m),.45);color:#fff}
+
+/* --- barra superior --- */
+body.neon .app-header{
+  background:rgba(7,6,15,.78);border-bottom:1px solid rgba(var(--neon-m),.45);
+  box-shadow:0 0 18px rgba(var(--neon-m),.18);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+}
+body.neon .app-header .ah-brand{font-family:var(--tit);letter-spacing:.04em;text-shadow:0 0 10px rgba(var(--neon-c),.55)}
+body.neon .app-header .ah-brand .mark{background:linear-gradient(135deg,#ff2bd6,#00e5ff);color:#fff;
+  box-shadow:0 0 12px rgba(var(--neon-m),.7),0 0 24px rgba(var(--neon-c),.35);text-shadow:0 0 6px rgba(0,0,0,.4)}
+body.neon .badge-perfil{background:#ff2bd6;color:#fff;box-shadow:0 0 10px rgba(var(--neon-m),.8)}
+body.neon :is(.btn-hdr,.tglTheme,.btn-menu,.btn-export){background:rgba(21,18,49,.8);border-color:rgba(var(--neon-c),.35);color:var(--text)}
+body.neon :is(.btn-hdr,.tglTheme,.btn-menu,.btn-export):hover{border-color:#00e5ff;color:#5ff3ff;box-shadow:0 0 12px rgba(var(--neon-c),.45)}
+body.neon .btn-hdr.logout:hover{border-color:var(--bad);color:var(--bad);box-shadow:0 0 12px rgba(255,61,110,.45)}
+body.neon #btn-theme{color:#ff6be6;text-shadow:0 0 8px rgba(var(--neon-m),.9)}
+
+/* --- menú lateral --- */
+body.neon .sidebar{background:rgba(14,12,29,.82);border-right:1px solid rgba(var(--neon-c),.22)}
+body.neon .sb-sect{color:#5ff3ff;text-shadow:0 0 8px rgba(var(--neon-c),.6)}
+body.neon .sb-nav button .ic{background:rgba(var(--neon-c),.08);color:#5ff3ff;border:1px solid rgba(var(--neon-c),.25)}
+body.neon .sb-nav button:hover{background:rgba(var(--neon-c),.07);color:#fff}
+body.neon .sb-nav button.on{
+  background:linear-gradient(90deg,rgba(var(--neon-m),.28),transparent 90%);color:#fff;border-left-color:#ff2bd6;
+  text-shadow:0 0 10px rgba(var(--neon-m),.9);
+}
+body.neon .sb-nav button.on .ic{background:#ff2bd6;color:#fff;border-color:#ff2bd6;box-shadow:0 0 12px rgba(var(--neon-m),.85),0 0 24px rgba(var(--neon-m),.4)}
+body.neon .sb-nav button.on::after{background:#00e5ff;box-shadow:0 0 6px #00e5ff,0 0 14px rgba(var(--neon-c),.8)}
+
+/* --- títulos --- */
+body.neon .tab-title{font-family:var(--tit);letter-spacing:.08em;border-color:rgba(var(--neon-m),.55);
+  background:rgba(14,12,29,.85);box-shadow:0 0 14px rgba(var(--neon-m),.3),inset 0 0 10px rgba(var(--neon-m),.12);
+  text-shadow:0 0 8px rgba(var(--neon-m),.7)}
+body.neon .tab-title::before{background:#00e5ff;box-shadow:0 0 10px #00e5ff}
+body.neon .tab-title .tp{color:#5ff3ff;text-shadow:0 0 10px rgba(var(--neon-c),.9)}
+body.neon .chart-lbl{color:#5ff3ff;text-shadow:0 0 6px rgba(var(--neon-c),.45)}
+body.neon .panel-head h3{text-shadow:0 0 10px rgba(var(--neon-m),.45)}
+
+/* --- controles --- */
+body.neon :is(select.ctl,input.ctl,.fecha-multi-btn){background:#0b0a18;border:1px solid var(--border);color:var(--text)}
+body.neon :is(select.ctl,input.ctl):focus{outline:none;border-color:#00e5ff;box-shadow:0 0 0 1px #00e5ff,0 0 12px rgba(var(--neon-c),.5)}
+body.neon select.ctl.filtro-activo{border-color:#ff2bd6;box-shadow:0 0 10px rgba(var(--neon-m),.55)}
+body.neon .dias-btn{border-color:rgba(var(--neon-c),.3);color:var(--muted)}
+body.neon .dias-btn:hover{border-color:#00e5ff;color:#5ff3ff;box-shadow:0 0 10px rgba(var(--neon-c),.4)}
+body.neon .dias-btn.on,body.neon .vista-tgl button.on{background:#ff2bd6;border-color:#ff2bd6;color:#fff;
+  box-shadow:0 0 12px rgba(var(--neon-m),.8),0 0 26px rgba(var(--neon-m),.35);text-shadow:0 0 6px rgba(255,255,255,.6)}
+body.neon .vista-tgl{background:#0b0a18;border-color:rgba(var(--neon-c),.3)}
+
+/* --- paneles, gráficos y tarjetas con borde luminoso --- */
+body.neon :is(.panel,.chart-card){background:rgba(14,12,29,.88);border-color:rgba(var(--neon-c),.28);
+  box-shadow:0 0 0 1px rgba(var(--neon-c),.05),0 0 22px rgba(var(--neon-c),.07)}
+body.neon .panel-head{border-bottom-color:rgba(var(--neon-c),.2)}
+body.neon .kpi-v2 .kpi-card{--kc:#00e5ff;background:rgba(14,12,29,.9);
+  border-color:color-mix(in srgb,var(--kc) 45%,transparent);box-shadow:0 0 14px color-mix(in srgb,var(--kc) 22%,transparent)}
+body.neon .kpi-v2 .kpi-card::before{box-shadow:0 0 10px var(--kc),0 0 18px var(--kc)}
+body.neon .kpi-v2 .kpi-card .ico{box-shadow:0 0 10px color-mix(in srgb,var(--kc) 45%,transparent)}
+body.neon .kpi-v2 .kpi-card .kv{text-shadow:0 0 10px color-mix(in srgb,currentColor 65%,transparent)}
+body.neon .kpi-v2 .kpi-card:hover{box-shadow:0 0 0 1px var(--kc),0 0 26px color-mix(in srgb,var(--kc) 55%,transparent),0 14px 30px rgba(0,0,0,.6)}
+body.neon .kpi-v2 .kpi-card:hover .kv{text-shadow:0 0 14px currentColor,0 0 28px color-mix(in srgb,currentColor 60%,transparent)}
+
+/* --- tablas --- */
+body.neon table.datos thead th{background:#120f28;color:#5ff3ff;border-bottom:1px solid rgba(var(--neon-c),.35);text-shadow:0 0 6px rgba(var(--neon-c),.45)}
+body.neon table.datos tbody td{border-bottom-color:rgba(124,108,255,.14)}
+body.neon table.datos tbody tr:hover td{background:rgba(var(--neon-m),.07)}
+body.neon table.datos tr.fila-total td{background:#120f28;border-top:2px solid #ff2bd6;box-shadow:0 -6px 12px -8px rgba(var(--neon-m),.8)}
+body.neon .sv{text-shadow:0 0 8px currentColor}
+body.neon .cond-badge{box-shadow:0 0 8px color-mix(in srgb,currentColor 35%,transparent)}
+
+body.neon ::-webkit-scrollbar{width:10px;height:10px}
+body.neon ::-webkit-scrollbar-thumb{background:linear-gradient(#ff2bd6,#00e5ff);border-radius:10px;border:3px solid #07060f}
+@media (prefers-reduced-motion:reduce){ body.neon{background-attachment:scroll} }

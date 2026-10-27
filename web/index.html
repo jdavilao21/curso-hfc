@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HFC · Panel de Gestión</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Serif+Display&family=Orbitron:wght@600;800&family=Manrope:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/estilos.css?v=126">
+<link rel="stylesheet" href="css/login-gea.css?v=10">
+<link rel="stylesheet" href="css/kpi-v2.css?v=2">
+<link rel="stylesheet" href="css/tema-ios.css?v=1">
+<link rel="stylesheet" href="css/tema-neon.css?v=1">
+<link rel="stylesheet" href="css/filtros-fx.css?v=3">
+<link rel="stylesheet" href="css/tablas-compactas.css?v=3">
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js" integrity="sha384-OUW9euuUyxyHcAhTqbhI+Iyb8LMssXt/cpz0yXhs9UWG2/R/uaWdakx/4cfww7Vb" crossorigin="anonymous" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" integrity="sha384-NrKB+u6Ts6AtkIhwPixiKTzgSKNblyhlk0Sohlgar9UHUBzai/sgnNNWWd291xqt" crossorigin="anonymous" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js" integrity="sha384-y49Zu59jZHJL/PLKgZPv3k2WI9c0Yp3pWB76V8OBVCb0QBKS8l4Ff3YslzHVX76Y" crossorigin="anonymous" defer></script>
+<script src="js/22-transicion-filtros.js?v=3" defer></script>
+</head>
+<body>
+
+<!-- ===================== LOGIN ===================== -->
+<div id="pantalla-login">
+  <!-- Login HFC v2 (08-oct-2026): diseño que Jose trajo de ChatGPT (Inicio-de-sesion-GEA.zip, React) pasado a HTML/CSS
+       sin React ni compilación, conectado al login real (doLogin de js/01-core.js, mismos ids). Mascota GEA en
+       assets/mascota-gea.webp; reacciones en js/login-mascota.js; estilos en css/login-gea.css. -->
+  <div class="gl-shell gl-cerrado">   <!-- gl-cerrado: formulario oculto hasta el primer clic en el bot (js/login-mascota.js) -->
+    <section class="gl-scene" id="gl-scene" aria-label="Bienvenida">
+      <div class="gl-copy">
+        <span class="gl-eyebrow">HFC · CLARO PERÚ</span>
+        <h1>Tu turno comienza aquí.</h1>
+        <p id="gl-escribe">Nivel de servicio, agentes y calidad de la operación HFC en un solo lugar.</p>
+        <div class="gl-pill"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg> Asistente virtual GEA</div>
+      </div>
+      <div class="gl-stage">
+        <div class="gl-halo gl-halo-1" aria-hidden="true"></div>
+        <div class="gl-halo gl-halo-2" aria-hidden="true"></div>
+        <button type="button" class="gl-mascota" id="gl-mascota" aria-label="Mostrar el formulario de ingreso" aria-controls="login-form" aria-expanded="false" title="Haz clic para iniciar">
+          <img src="assets/mascota-gea.webp" alt="" width="720" height="608" decoding="async">
+        </button>
+        <div class="gl-sombra" aria-hidden="true"></div>
+        <div class="gl-burbuja" id="gl-burbuja" aria-live="polite">¡Haz clic en mí para iniciar! 👆</div>
+      </div>
+    </section>
+
+    <section class="gl-lado">
+      <form class="gl-card" id="login-form" onsubmit="event.preventDefault(); doLogin();" novalidate>
+        <div class="gl-marca"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg> HFC · Panel de Gestión</div>
+        <div class="gl-head">
+          <span>BIENVENIDO</span>
+          <h2>Inicia sesión</h2>
+          <p>Ingresa con el usuario que te asignó tu supervisor.</p>
+        </div>
+
+        <label class="gl-field" for="inp-user">
+          <span>Usuario</span>
+          <div class="gl-ctl">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="9" cy="11" r="2.2"/><path d="M5.8 16a3.4 3.4 0 0 1 6.4 0M14 10h4M14 13.5h3"/></svg>
+            <input id="inp-user" type="text" placeholder="Ej. SUP.DEMO" autocomplete="username" autocapitalize="characters" spellcheck="false" style="text-transform:uppercase">
+          </div>
+        </label>
+
+        <label class="gl-field" for="inp-pass">
+          <span>Contraseña</span>
+          <div class="gl-ctl">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+            <input id="inp-pass" type="password" placeholder="Tu contraseña" autocomplete="current-password">
+            <button type="button" class="gl-ojo" id="btn-ver-pass" aria-label="Mostrar contraseña" aria-pressed="false">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <small class="gl-mayus" id="gl-mayus" hidden>⚠ Bloq Mayús está activado</small>
+        </label>
+
+        <button id="btn-login" class="gl-btn" type="submit">Ingresar</button>
+        <div id="login-err" class="login-err" role="alert"></div>
+        <p class="gl-nota">Acceso exclusivo para personal autorizado. ¿Problemas para ingresar? Consulta con tu supervisor.</p>
+
+        <!-- Firma del área (Jose, 08-oct-2026: «destaca la firma del área en el login»). -->
+        <footer class="gl-firma" aria-label="Área responsable">
+          <span class="gl-firma-logo" aria-hidden="true">GEA</span>
+          <span class="gl-firma-txt"><small>Un sistema de la</small><b>Jefatura de Planificación y Métricas</b><small>GEA Internacional · HFC v2.0</small></span>
+        </footer>
+      </form>
+    </section>
+  </div>
+</div>
+
+<!-- ===================== APP ===================== -->
+<div id="app">
+  <div class="app-header">
+    <div class="ah-left">
+      <button class="btn-menu" id="btn-menu" type="button" onclick="toggleSidebar()" aria-label="Contraer menú" aria-controls="main-sidebar" aria-expanded="true" title="Contraer menú">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="ah-brand"><span class="mark">HFC</span> HFC<span class="brand-sub"> · Panel de Gestión</span></div>
+    </div>
+    <div class="ah-right">
+      <div class="nav-settings-wrap">
+        <button class="tglTheme" id="btn-nav-settings" type="button" onclick="toggleNavSettings()" aria-label="Configurar menú" aria-expanded="false" title="Configurar menú">⚙</button>
+        <div id="nav-settings" class="nav-settings" hidden>
+          <strong>Ubicación del menú</strong>
+          <select id="nav-position" class="ctl" aria-label="Ubicación del menú" onchange="setNavPosition(this.value)">
+            <option value="left">Izquierda</option><option value="right">Derecha</option><option value="top">Arriba</option><option value="bottom">Abajo</option>
+          </select>
+          <label><input id="nav-keep-compact" type="checkbox" onchange="setNavKeepCompact(this.checked)"> Mantener compacto</label>
+        </div>
+      </div>
+      <span class="ah-user" id="sb-who">—</span>
+      <span class="badge-perfil" id="sb-perfil">—</span>
+      <button class="btn-hdr" id="btn-refresh" onclick="doRefresh()" title="Recargar datos desde el servidor">
+        <svg id="ico-refresh" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        <span class="btn-hdr-txt">Actualizar</span>
+      </button>
+      <button class="tglTheme" id="btn-tv" onclick="toggleTV()" title="Modo TV: pantalla completa que rota entre pestañas">📺</button>
+      <button id="btn-theme" class="tglTheme" onclick="toggleTema()">◐</button>
+      <button class="btn-hdr logout" onclick="cerrarSesion()" title="Cerrar sesión">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <span class="btn-hdr-txt">Salir</span>
+      </button>
+    </div>
+  </div>
+
+  <div id="carga-estado" class="carga-estado" style="display:none">
+    <span class="msg">Cargando…</span>
+    <button class="dias-btn" onclick="cargarDatosReales()">↻ Reintentar</button>
+  </div>
+
+  <div class="app-layout">
+  <nav class="sidebar" id="main-sidebar" aria-label="Secciones del dashboard">
+    <div class="sb-sect">Menú</div>
+    <div class="sb-nav">
+      <button class="on" data-tab="diario" onclick="switchTab('diario',this)"><span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span> Diario</button>
+      <button data-tab="intervalos" onclick="switchTab('intervalos',this)"><span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span> Intervalos</button>
+      <button data-tab="supervisores" onclick="switchTab('supervisores',this)"><span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Supervisores</button>
+      <button data-tab="asesores" onclick="switchTab('asesores',this)"><span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg></span> Asesores</button>
+    </div>
+  </nav>
+
+  <div class="main">
+    <div class="content">
+
+    <!-- ---------- DIARIO ---------- -->
+    <div id="tab-diario" class="tab-pane on">
+      <div class="tab-title"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Resumen diario · <span class="tp" id="dia-periodo-pill">—</span></div>
+
+      <div class="filtros fx">
+        <div class="fld"><label for="sel-periodo">Período</label><select id="sel-periodo" class="ctl"></select></div>
+        <div class="fld"><label for="sel-semana">Semana</label><select id="sel-semana" class="ctl"></select></div>
+        <div class="fld"><label>Rango</label>
+          <div class="dias-grp" id="dia-dias-seg">
+            <button class="dias-btn on" data-dias="ALL">Todo</button>
+            <button class="dias-btn" data-dias="7">7D</button>
+            <button class="dias-btn" data-dias="14">14D</button>
+            <button class="dias-btn" data-dias="31">31D</button>
+          </div></div>
+        <div class="fld"><label for="inp-tnps-meta-dia">Meta TNPS %</label><input id="inp-tnps-meta-dia" class="ctl inp-tnps-meta" type="number" value="85"></div>
+        <div class="fld"><label>Mostrar fecha actual</label>
+          <div class="vista-tgl" id="dia-fecha-hoy-tgl">
+            <button data-fh="si" title="Sí: incluye la fecha más reciente cargada" onclick="setDiaFechaHoy('si',this)">Sí</button>
+            <button class="on" data-fh="no" title="No: excluye solo la fecha más reciente cargada" onclick="setDiaFechaHoy('no',this)">No</button>
+          </div></div>
+        <div class="fld"><label>TMG</label>
+          <div class="vista-tgl tmg-vista-tgl" id="dia-tmg-tgl">
+            <button class="on" data-tmg="ambos" title="Ambos: TMG Real / TMG Rq., como ahora" onclick="setTmgVista('ambos',this)">Ambos</button>
+            <button data-tmg="solo" title="TMG Solo: solo TMG Real, con total en la fila TOTAL" onclick="setTmgVista('solo',this)">TMG Solo</button>
+          </div></div>
+        <div class="fx-tools"><span id="dia-fila-chip" class="cond-badge cb-def xf-chip" role="button" tabindex="0" hidden onclick="limpiarFilaDiario()" onkeydown="if(event.key==='Enter')limpiarFilaDiario()" title="Clic (o Escape) para volver a ver todas las filas"></span><button class="dias-btn" type="button" onclick="abrirModalCumplDia()">📊 Gráfico de Cumplimiento</button><button class="dias-btn" type="button" onclick="toggleTarjetasPanel('dia')" title="Elegir qué tarjetas ver y en qué orden">🎛 Personalizar tarjetas</button></div>
+      </div>
+      <div class="kpi-strip kpi-v2" id="kpi-strip-dia"></div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-head-left">
+            <h3 id="dia-tbl-title">Detalle diario</h3>
+            <div class="vista-tgl" id="dia-vista-tgl">
+              <button class="on" data-vista="dia" onclick="setDiaVista('dia',this)">Diario</button>
+              <button data-vista="semana" onclick="setDiaVista('semana',this)">Semanal</button>
+              <button data-vista="mes" onclick="setDiaVista('mes',this)">Mensual</button>
+            </div>
+          </div>
+          <div class="panel-actions">
+            <button class="btn-export" onclick="exportDiario()">⬇ Excel</button>
+            <button class="dias-btn" onclick="toggleColPanel('dia', this)">⊞ Columnas · KPIs</button>
+          </div>
+        </div>
+        <div class="tbl-scroll">
+          <table class="datos" id="tbl-dia">
+            <thead><tr>
+              <th id="dia-th-eje" class="sortable" onclick="sortTabla('dia',0,this)">Fecha</th><th class="sortable" data-col="CUMPL" onclick="sortTabla('dia',1,this)">Cumpl.</th><th class="sortable" data-col="NS" onclick="sortTabla('dia',2,this)">%NS</th><th class="sortable" data-col="NA" onclick="sortTabla('dia',3,this)">%NA</th><th class="sortable" data-col="ABAN" onclick="sortTabla('dia',4,this)">%Aband.</th><th class="sortable" data-col="TRAF_DIM" onclick="sortTabla('dia',5,this)">Tráf.Dim</th>
+              <th class="sortable" data-col="RECIBIDAS" onclick="sortTabla('dia',6,this)">Recibidas</th><th class="sortable" data-col="ATENDIDAS" onclick="sortTabla('dia',7,this)">Atendidas</th><th class="sortable" data-col="ABANDONADAS" onclick="sortTabla('dia',8,this)">Abandon.</th><th class="sortable" data-col="CAT" onclick="sortTabla('dia',9,this)">CAT</th><th class="sortable" data-col="PCT_CAT" onclick="sortTabla('dia',10,this)">%CAT</th><th class="sortable" data-col="OCUP" onclick="sortTabla('dia',11,this)">%Ocup</th>
+              <th class="sortable" data-col="AG_REAL" onclick="sortTabla('dia',12,this)">Ag.Real</th><th class="sortable" data-col="AG_RQ" onclick="sortTabla('dia',13,this)">Ag.Rq</th><th class="sortable" data-col="AG_DELTA" onclick="sortTabla('dia',14,this)">Ag.Δ</th><th class="sortable" data-col="UTIL" onclick="sortTabla('dia',15,this)">%Util</th><th class="sortable" data-col="TMG" onclick="sortTabla('dia',16,this)">TMG P/RQ</th><th class="sortable" data-col="TMG_DELTA" onclick="sortTabla('dia',17,this)">TMG Δ</th>
+              <th class="sortable" data-col="HRS_PROD" onclick="sortTabla('dia',18,this)">Hrs.Prod</th><th class="sortable" data-col="CUMP_TRAF" onclick="sortTabla('dia',19,this)">Cump.Tráf</th><th class="sortable" data-col="TNPS" onclick="sortTabla('dia',20,this)">%TNPS</th><th class="sortable" data-col="TRANSF" onclick="sortTabla('dia',21,this)">%Transf</th>
+              <th class="sortable" data-col="TRANSF_TOT" onclick="sortTabla('dia',22,this)">Transf.Tot</th><th class="sortable" data-col="TRANS_VICIO" onclick="sortTabla('dia',23,this)">T.Vicio</th><th class="sortable" data-col="TRANS_IVR" onclick="sortTabla('dia',24,this)">T.IVR123</th><th class="sortable" data-col="TRANS_BPO" onclick="sortTabla('dia',25,this)">T.Otro BPO</th><th class="sortable" data-col="TRANS_GEA" onclick="sortTabla('dia',26,this)">T.Otro GEA</th>
+              <th class="sortable" data-col="TRANS_ENC" onclick="sortTabla('dia',27,this)">Trans.Enc</th><th class="sortable" data-col="PARTIC" onclick="sortTabla('dia',28,this)">%Transf Encu.</th><th class="sortable" data-col="IND_ENC" onclick="sortTabla('dia',29,this)">%Ind.Enc</th>
+              <th class="sortable" data-col="PCT_T_VICIO" onclick="sortTabla('dia',30,this)">%T.Vicio</th><th class="sortable" data-col="PCT_T_IVR" onclick="sortTabla('dia',31,this)">%T.IVR123</th><th class="sortable" data-col="PCT_T_BPO" onclick="sortTabla('dia',32,this)">%T.Otro BPO</th><th class="sortable" data-col="PCT_T_GEA" onclick="sortTabla('dia',33,this)">%T.Otro GEA</th><th class="sortable" data-col="VAR_TRAF" onclick="sortTabla('dia',34,this)">Var.Tráf</th><th class="sortable" data-col="TNPS_ENC" onclick="sortTabla('dia',35,this)">Encuestas</th><th class="sortable" data-col="TNPS_PROM" onclick="sortTabla('dia',36,this)">Promotores</th><th class="sortable" data-col="TNPS_NEU" onclick="sortTabla('dia',37,this)">Neutros</th><th class="sortable" data-col="TNPS_DET" onclick="sortTabla('dia',38,this)">Detractores</th><th class="sortable" data-col="TNPS_PPROM" onclick="sortTabla('dia',39,this)">%Prom.</th><th class="sortable" data-col="TNPS_PNEU" onclick="sortTabla('dia',40,this)">%Neu.</th><th class="sortable" data-col="TNPS_PDET" onclick="sortTabla('dia',41,this)">%Det.</th><th class="sortable" data-col="TNPS_PRESP" onclick="sortTabla('dia',42,this)">%Resp.</th>
+            </tr></thead>
+            <tbody id="tbody-dia"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- INTERVALOS ---------- -->
+    <div id="tab-intervalos" class="tab-pane">
+      <div class="tab-title"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Intervalos de 30 min · <span class="tp" id="int-fecha-pill">—</span></div>
+
+      <div class="filtros fx">
+        <div class="fld"><label for="sel-fecha-int">Fecha</label><select id="sel-fecha-int" class="ctl"></select></div>
+        <div class="fld"><label for="inp-tnps-meta-int">Meta TNPS %</label><input id="inp-tnps-meta-int" class="ctl inp-tnps-meta" type="number" value="85"></div>
+        <div class="fld"><label>TMG</label>
+          <div class="vista-tgl tmg-vista-tgl" id="int-tmg-tgl">
+            <button class="on" data-tmg="ambos" title="Ambos: TMG Real / TMG Rq., como ahora" onclick="setTmgVista('ambos',this)">Ambos</button>
+            <button data-tmg="solo" title="TMG Solo: solo TMG Real, con total en la fila TOTAL" onclick="setTmgVista('solo',this)">TMG Solo</button>
+          </div></div>
+        <div class="fx-tools"><button class="dias-btn" type="button" onclick="toggleTarjetasPanel('int')" title="Elegir qué tarjetas ver y en qué orden">🎛 Personalizar tarjetas</button></div>
+      </div>
+      <div class="kpi-strip kpi-v2" id="kpi-strip-int"></div>
+
+      <div class="charts-int-grid" id="charts-int-grid" style="display:none">
+        <div class="chart-card chart-expandable" onclick="openChartModal('ns','% NS · % Atención',_INT_CHARTS)"><div class="chart-lbl">% NS · % Atención <span class="cmo-expand-icon">⤢</span></div><div class="chart-canvas-wrap"><canvas id="ch-int-ns"></canvas></div></div>
+        <div class="chart-card chart-expandable" onclick="openChartModal('llam','Llamadas por franja',_INT_CHARTS)"><div class="chart-lbl">Llamadas por franja <span class="cmo-expand-icon">⤢</span></div><div class="chart-canvas-wrap"><canvas id="ch-int-llam"></canvas></div></div>
+        <div class="chart-card chart-expandable" onclick="openChartModal('tmg','TMG Real vs Dim.',_INT_CHARTS)"><div class="chart-lbl">TMG Real vs Dim. <span class="cmo-expand-icon">⤢</span></div><div class="chart-canvas-wrap"><canvas id="ch-int-tmg"></canvas></div></div>
+        <div class="chart-card chart-expandable" onclick="openChartModal('ag','Agentes Real vs Rq.',_INT_CHARTS)"><div class="chart-lbl">Agentes Real vs Rq. <span class="cmo-expand-icon">⤢</span></div><div class="chart-canvas-wrap"><canvas id="ch-int-ag"></canvas></div></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-head-left">
+            <h3>Detalle por franja</h3>
+            <div class="dias-grp" id="int-cant-seg">
+              <button class="dias-btn" data-cant="9">9 interv</button>
+              <button class="dias-btn" data-cant="18">18 interv</button>
+              <button class="dias-btn" data-cant="27">27 interv</button>
+              <button class="dias-btn on" data-cant="36">36 interv</button>
+            </div>
+          </div>
+          <div class="panel-actions">
+            <button class="btn-export" onclick="exportIntervalos()">⬇ Excel</button>
+            <button class="dias-btn" onclick="toggleColPanel('int', this)">⊞ Columnas · KPIs</button>
+          </div>
+        </div>
+        <div class="tbl-scroll">
+          <table class="datos" id="tbl-int">
+            <thead><tr>
+              <th class="sortable" onclick="sortTabla('int',0,this)">Franja</th><th class="sortable" data-col="CUMPL" onclick="sortTabla('int',1,this)">Cumpl.</th><th class="sortable" data-col="NS" onclick="sortTabla('int',2,this)">%NS</th><th class="sortable" data-col="NA" onclick="sortTabla('int',3,this)">%NA</th><th class="sortable" data-col="ABAN" onclick="sortTabla('int',4,this)">%Aband.</th><th class="sortable" data-col="TRAF_DIM" onclick="sortTabla('int',5,this)">Tráf.Dim</th>
+              <th class="sortable" data-col="RECIBIDAS" onclick="sortTabla('int',6,this)">Recibidas</th><th class="sortable" data-col="ATENDIDAS" onclick="sortTabla('int',7,this)">Atendidas</th><th class="sortable" data-col="ABANDONADAS" onclick="sortTabla('int',8,this)">Abandon.</th><th class="sortable" data-col="CAT" onclick="sortTabla('int',9,this)">CAT</th><th class="sortable" data-col="PCT_CAT" onclick="sortTabla('int',10,this)">%CAT</th><th class="sortable" data-col="OCUP" onclick="sortTabla('int',11,this)">%Ocup</th>
+              <th class="sortable" data-col="AG_REAL" onclick="sortTabla('int',12,this)">Ag.Real</th><th class="sortable" data-col="AG_RQ" onclick="sortTabla('int',13,this)">Ag.Rq</th><th class="sortable" data-col="AG_DELTA" onclick="sortTabla('int',14,this)">Ag.Δ</th><th class="sortable" data-col="UTIL" onclick="sortTabla('int',15,this)">%Util</th><th class="sortable" data-col="TMG" onclick="sortTabla('int',16,this)">TMG P/RQ</th><th class="sortable" data-col="TMG_DELTA" onclick="sortTabla('int',17,this)">TMG Δ</th>
+              <th class="sortable" data-col="HRS_PROD" onclick="sortTabla('int',18,this)">Hrs.Prod</th><th class="sortable" data-col="CUMP_TRAF" onclick="sortTabla('int',19,this)">Cump.Tráf</th><th class="sortable" data-col="TNPS" onclick="sortTabla('int',20,this)">%TNPS</th><th class="sortable" data-col="TRANSF" onclick="sortTabla('int',21,this)">%Transf</th>
+              <th class="sortable" data-col="TRANSF_TOT" onclick="sortTabla('int',22,this)">Transf.Tot</th><th class="sortable" data-col="TRANS_VICIO" onclick="sortTabla('int',23,this)">T.Vicio</th><th class="sortable" data-col="TRANS_IVR" onclick="sortTabla('int',24,this)">T.IVR123</th><th class="sortable" data-col="TRANS_BPO" onclick="sortTabla('int',25,this)">T.Otro BPO</th><th class="sortable" data-col="TRANS_GEA" onclick="sortTabla('int',26,this)">T.Otro GEA</th>
+              <th class="sortable" data-col="TRANS_ENC" onclick="sortTabla('int',27,this)">Trans.Enc</th><th class="sortable" data-col="PARTIC" onclick="sortTabla('int',28,this)">%Transf Encu.</th><th class="sortable" data-col="IND_ENC" onclick="sortTabla('int',29,this)">%Ind.Enc</th>
+              <th class="sortable" data-col="PCT_T_VICIO" onclick="sortTabla('int',30,this)">%T.Vicio</th><th class="sortable" data-col="PCT_T_IVR" onclick="sortTabla('int',31,this)">%T.IVR123</th><th class="sortable" data-col="PCT_T_BPO" onclick="sortTabla('int',32,this)">%T.Otro BPO</th><th class="sortable" data-col="PCT_T_GEA" onclick="sortTabla('int',33,this)">%T.Otro GEA</th><th class="sortable" data-col="VAR_TRAF" onclick="sortTabla('int',34,this)">Var.Tráf</th><th class="sortable" data-col="TNPS_ENC" onclick="sortTabla('int',35,this)">Encuestas</th><th class="sortable" data-col="TNPS_PROM" onclick="sortTabla('int',36,this)">Promotores</th><th class="sortable" data-col="TNPS_NEU" onclick="sortTabla('int',37,this)">Neutros</th><th class="sortable" data-col="TNPS_DET" onclick="sortTabla('int',38,this)">Detractores</th><th class="sortable" data-col="TNPS_PPROM" onclick="sortTabla('int',39,this)">%Prom.</th><th class="sortable" data-col="TNPS_PNEU" onclick="sortTabla('int',40,this)">%Neu.</th><th class="sortable" data-col="TNPS_PDET" onclick="sortTabla('int',41,this)">%Det.</th><th class="sortable" data-col="TNPS_PRESP" onclick="sortTabla('int',42,this)">%Resp.</th>
+            </tr></thead>
+            <tbody id="tbody-int"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- SUPERVISORES ---------- -->
+    <div id="tab-supervisores" class="tab-pane">
+      <div class="tab-title"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Producción por supervisor · <span class="tp" id="sup-periodo-pill">—</span></div>
+
+      <div class="filtros fx">
+        <div class="fld"><label for="sel-periodo-sup">Período</label><select id="sel-periodo-sup" class="ctl"></select></div>
+        <div class="fld"><label>Fecha</label><div id="sel-fecha-sup" class="fecha-multi"></div></div>
+        <div class="fld"><label for="sel-semana-sup">Semana</label><select id="sel-semana-sup" class="ctl" onchange="renderSupervisores()"><option value="">Todas</option></select></div>
+        <div class="fld"><label for="sel-coord-sup">Coordinador</label><select id="sel-coord-sup" class="ctl" onchange="renderSupervisores()"><option value="">Todos</option></select></div>
+        <div class="fld"><label for="inp-tnps-meta-sup">Meta TNPS %</label><input id="inp-tnps-meta-sup" class="ctl inp-tnps-meta" type="number" value="85"></div>
+        <div class="fld fld-buscar"><label for="txt-buscar-sup">Buscar</label><input type="text" id="txt-buscar-sup" class="ctl" placeholder="🔍 Supervisor…" oninput="renderSupervisores()"></div>
+        <div class="fx-tools"><button class="dias-btn" type="button" onclick="toggleTarjetasPanel('sup')" title="Elegir qué tarjetas ver y en qué orden">🎛 Personalizar tarjetas</button></div>
+      </div>
+      <div class="kpi-strip kpi-v2" id="kpi-strip-sup"></div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h3>Producción por supervisor</h3>
+          <div class="panel-actions">
+            <button class="btn-export" onclick="exportSupervisores()">⬇ Excel</button>
+            <button class="dias-btn" onclick="toggleColPanel('sup', this)">⊞ Columnas · KPIs</button>
+          </div>
+        </div>
+        <div class="tbl-scroll">
+          <table class="datos" id="tbl-sup">
+            <thead><tr>
+              <th class="sortable" onclick="sortSup(0,this)">Supervisor</th><th class="sortable" data-col="SUP_ATEND" onclick="sortSup(1,this)">Atendidas</th><th class="sortable" data-col="SUP_CAT" onclick="sortSup(2,this)">CAT</th><th class="sortable" data-col="SUP_PCAT" onclick="sortSup(3,this)">%CAT</th><th class="sortable" data-col="SUP_OCUP" onclick="sortSup(4,this)">%Ocup</th>
+              <th class="sortable" data-col="SUP_TMG" onclick="sortSup(5,this)">TMG</th><th class="sortable" data-col="SUP_HRS" onclick="sortSup(6,this)">Hrs.Prod</th><th class="sortable" data-col="SUP_PROM" onclick="sortSup(7,this)">Prom.</th><th class="sortable" data-col="SUP_DETR" onclick="sortSup(8,this)">Detr.</th><th class="sortable" data-col="SUP_PAS" onclick="sortSup(9,this)">Neu.</th><th class="sortable" data-col="SUP_TNPS" onclick="sortSup(10,this)">%TNPS</th><th class="sortable" data-col="SUP_UTIL" onclick="sortSup(11,this)">%Util</th><th class="sortable" data-col="SUP_TRANSF" onclick="sortSup(12,this)">%Transf</th>
+              <th class="sortable" data-col="SUP_TRANSF_TOT" onclick="sortSup(13,this)">Transf.Tot</th><th class="sortable" data-col="SUP_TRANS_VICIO" onclick="sortSup(14,this)">T.Vicio</th><th class="sortable" data-col="SUP_TRANS_IVR" onclick="sortSup(15,this)">T.IVR123</th><th class="sortable" data-col="SUP_TRANS_BPO" onclick="sortSup(16,this)">T.Otro BPO</th><th class="sortable" data-col="SUP_TRANS_GEA" onclick="sortSup(17,this)">T.Otro GEA</th><th class="sortable" data-col="SUP_CORTE_CL" onclick="sortSup(18,this)">%Corte Cl.</th>
+              <th class="sortable" data-col="SUP_TRANS_ENC" onclick="sortSup(19,this)">Trans.Enc</th><th class="sortable" data-col="SUP_PARTIC" onclick="sortSup(20,this)">%Transf Encu.</th><th class="sortable" data-col="SUP_IND_ENC" onclick="sortSup(21,this)">%Ind.Enc</th>
+              <th class="sortable" data-col="SUP_PCT_T_VICIO" onclick="sortSup(22,this)">%T.Vicio</th><th class="sortable" data-col="SUP_PCT_T_IVR" onclick="sortSup(23,this)">%T.IVR123</th><th class="sortable" data-col="SUP_PCT_T_BPO" onclick="sortSup(24,this)">%T.Otro BPO</th><th class="sortable" data-col="SUP_PCT_T_GEA" onclick="sortSup(25,this)">%T.Otro GEA</th><th class="sortable" data-col="SUP_ENC" onclick="sortSup(26,this)">Encuestas</th><th class="sortable" data-col="SUP_PPROM" onclick="sortSup(27,this)">%Prom.</th><th class="sortable" data-col="SUP_PNEU" onclick="sortSup(28,this)">%Neu.</th><th class="sortable" data-col="SUP_PDET" onclick="sortSup(29,this)">%Det.</th><th class="sortable" data-col="SUP_PRESP" onclick="sortSup(30,this)">%Resp.</th>
+            </tr></thead>
+            <tbody id="tbody-sup"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- ASESORES ---------- -->
+    <div id="tab-asesores" class="tab-pane">
+      <div class="tab-title"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>Producción por asesor · <span class="tp" id="as-periodo-pill">—</span></div>
+
+      <div class="filtros fx">
+        <div class="fld"><label for="sel-periodo-as">Período</label><select id="sel-periodo-as" class="ctl"></select></div>
+        <div class="fld"><label>Fecha</label><div id="sel-fecha-as" class="fecha-multi"></div></div>
+        <div class="fld"><label for="chk-as-dia1">Corte</label>
+          <label class="chk-dia1 fx-chk"><input type="checkbox" id="chk-as-dia1" onchange="setAsFechaCorte(this.checked)"> Día -1 (hasta ayer)</label></div>
+        <div class="fld"><label for="sel-semana-as">Semana</label><select id="sel-semana-as" class="ctl" onchange="renderAsesores()"><option value="">Todas</option></select></div>
+        <div class="fld"><label for="sel-coord-as">Coordinador</label><select id="sel-coord-as" class="ctl" onchange="renderAsesores()"><option value="">Todos</option></select></div>
+        <div class="fld"><label for="sel-sup-as">Supervisor</label><select id="sel-sup-as" class="ctl" onchange="renderAsesores()"><option value="">Todos</option></select></div>
+        <div class="fld"><label for="sel-cond-as">Cond. Laboral</label><select id="sel-cond-as" class="ctl" onchange="renderAsesores()"><option value="">Todas</option></select></div>
+        <div class="fld"><label for="sel-estadoop-as">Modalidad</label><select id="sel-estadoop-as" class="ctl" onchange="renderAsesores()" title="Filtra por Estado Operativo (Remoto/Presencial) — no afecta la tarjeta Remoto / Presencial, que siempre muestra el total del filtro base"><option value="">Todos</option></select></div>
+        <div class="fld"><label for="sel-contrato-as">Contrato</label><select id="sel-contrato-as" class="ctl" onchange="renderAsesores()" title="Tipo de contrato del asesor según la nómina (Operaciones / OJT)"><option value="">Todos</option></select></div>
+        <div class="fld"><label for="inp-tnps-meta-as">Meta TNPS %</label><input id="inp-tnps-meta-as" class="ctl inp-tnps-meta" type="number" value="85"></div>
+        <div class="fx-chips" id="as-filtros-activos">
+          <span id="as-filtro-chip-tnps" class="cond-badge cb-def" style="display:none;cursor:pointer" onclick="limpiarFiltroAsTnps()" title="Clic para quitar el filtro"></span>
+          <span id="as-filtro-chip-estado" class="cond-badge cb-def" style="display:none;cursor:pointer" onclick="limpiarFiltroAsEstado()" title="Clic para quitar el filtro"></span>
+        </div>
+        <div class="fx-acc"><button class="dias-btn" onclick="resetFiltrosAs()" title="Restablece Semana, Fecha, Coordinador, Supervisor, Cond. Laboral, Modalidad, Fecha, Día -1, buscador y los filtros de Estado y Cuartil TNPS de los gráficos — no toca Período">↺ Restablecer filtros</button></div>
+        <div class="fx-tools"><button class="dias-btn" type="button" onclick="toggleTarjetasPanel('as')" title="Elegir qué tarjetas ver y en qué orden">🎛 Personalizar tarjetas</button></div>
+      </div>
+      <div class="kpi-strip kpi-v2" id="kpi-strip-as"></div>
+
+      <div class="charts-int-grid" id="as-charts-grid">
+        <div class="chart-card rcag-donut-card" id="as-tnps-donut-card">
+          <div class="chart-lbl">Asesores por cuartil TNPS · clic filtra la tabla <span id="as-tnps-donut-filtro"></span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+            <div style="width:180px;height:180px"><canvas id="ch-as-tnps-donut"></canvas></div>
+            <div id="as-tnps-donut-leyenda" style="width:100%"></div>
+          </div>
+        </div>
+        <div class="chart-card rcag-donut-card" id="as-estado-donut-card">
+          <div class="chart-lbl">Asesores por Estado (Activo/Cese) · clic filtra la tabla <span id="as-estado-donut-filtro"></span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+            <div style="width:180px;height:180px"><canvas id="ch-as-estado-donut"></canvas></div>
+            <div id="as-estado-donut-leyenda" style="width:100%"></div>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-lbl">Top 10 Agentes · %TNPS</div>
+          <div class="chart-canvas-wrap" style="height:230px"><canvas id="ch-as-top10-agentes"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-lbl">Top 5 Supervisores · %TNPS</div>
+          <div class="chart-canvas-wrap" style="height:230px"><canvas id="ch-as-top5-sup"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-lbl">Top 10 · concentración de detractores</div>
+          <div class="chart-canvas-wrap" style="height:230px"><canvas id="ch-as-top-det"></canvas></div>
+          <div class="as-top-det-pie" id="as-top-det-pie"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-head-left">
+            <h3 style="font-size:18px;color:var(--accent-ink)">Producción por asesor</h3>
+            <span id="as-subtitulo" style="font-size:13.5px;font-weight:600;color:var(--text);opacity:.85;font-family:var(--mono)">—</span>
+            <div class="cond-resumen" id="as-cond-resumen" style="margin:0"></div>
+            <span id="as-rango-fechas" class="cond-badge cb-def" style="display:none"></span>
+          </div>
+          <div class="panel-actions">
+            <input type="text" id="txt-buscar-as" class="ctl" placeholder="🔍 Buscar asesor…" oninput="renderAsesores()" style="width:195px">
+            <button class="btn-export" onclick="exportAsesores()">⬇ Excel</button>
+            <button class="dias-btn" onclick="toggleColPanel('as', this)">⊞ Columnas · KPIs</button>
+          </div>
+        </div>
+        <div class="tbl-scroll">
+          <table class="datos" id="tbl-as">
+            <thead><tr>
+              <th class="sortable" onclick="sortAs(0)" style="text-align:left">Usuario</th><th class="sortable" onclick="sortAs(1)" style="text-align:left">Nombre</th><th class="sortable" data-col="AS_COND" onclick="sortAs(2)" style="text-align:left">Cond. Laboral</th><th class="sortable" data-col="AS_ESTADO" onclick="sortAs(3)">Estado</th><th class="sortable" data-col="AS_ATEND" onclick="sortAs(4)">Atendidas</th><th class="sortable" data-col="AS_DIAS" onclick="sortAs(5)">Días</th><th class="sortable" data-col="AS_PROM_AT" onclick="sortAs(6)">Prom.At.</th>
+              <th class="sortable" data-col="AS_TMG" onclick="sortAs(7)">TMG Real</th><th class="sortable" data-col="AS_CAT" onclick="sortAs(8)">Cat.Ag.</th><th class="sortable" data-col="AS_PCAT" onclick="sortAs(9)">%Cat.Ag.</th><th class="sortable" data-col="AS_PROM" onclick="sortAs(10)">Promotor</th><th class="sortable" data-col="AS_DETR" onclick="sortAs(11)">Detractor</th>
+              <th class="sortable" data-col="AS_PAS" onclick="sortAs(12)">Neutros</th><th class="sortable" data-col="AS_TNPS" onclick="sortAs(13)">%TNPS</th><th class="sortable" data-col="AS_TRANSF" onclick="sortAs(14)">%Transf</th>
+              <th class="sortable" data-col="AS_TRANSF_TOT" onclick="sortAs(15)">Transf.Tot</th><th class="sortable" data-col="AS_TRANS_VICIO" onclick="sortAs(16)">T.Vicio</th><th class="sortable" data-col="AS_TRANS_IVR" onclick="sortAs(17)">T.IVR123</th><th class="sortable" data-col="AS_TRANS_BPO" onclick="sortAs(18)">T.Otro BPO</th><th class="sortable" data-col="AS_TRANS_GEA" onclick="sortAs(19)">T.Otro GEA</th><th class="sortable" data-col="AS_CORTE_CL" onclick="sortAs(20)">%Corte Cl.</th>
+              <th class="sortable" data-col="AS_TRANS_ENC" onclick="sortAs(21)">Trans.Enc</th><th class="sortable" data-col="AS_PARTIC" onclick="sortAs(22)">%Transf Encu.</th><th class="sortable" data-col="AS_IND_ENC" onclick="sortAs(23)">%Ind.Enc</th>
+              <th class="sortable" data-col="AS_PCT_T_VICIO" onclick="sortAs(24)">%T.Vicio</th><th class="sortable" data-col="AS_PCT_T_IVR" onclick="sortAs(25)">%T.IVR123</th><th class="sortable" data-col="AS_PCT_T_BPO" onclick="sortAs(26)">%T.Otro BPO</th><th class="sortable" data-col="AS_PCT_T_GEA" onclick="sortAs(27)">%T.Otro GEA</th><th class="sortable" data-col="AS_ENC" onclick="sortAs(28)">Encuestas</th><th class="sortable" data-col="AS_PPROM" onclick="sortAs(29)">%Prom.</th><th class="sortable" data-col="AS_PNEU" onclick="sortAs(30)">%Neu.</th><th class="sortable" data-col="AS_PDET" onclick="sortAs(31)">%Det.</th><th class="sortable" data-col="AS_PRESP" onclick="sortAs(32)">%Resp.</th><th class="sortable" data-col="AS_CUARTIL_TNPS" onclick="sortAs(33)">Cuartil TNPS</th><th class="sortable" data-col="AS_APORTE_DET" onclick="sortAs(34)">% de Detract.</th><th class="sortable" data-col="AS_DIAS_CRIT" onclick="sortAs(35)">Días crít.</th>
+            </tr></thead>
+            <tbody id="tbody-as"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+
+    
+
+
+    
+
+
+
+
+
+    
+
+    
+
+    
+      <!-- Pie de página en todas las pestañas (Jose, 08-oct-2026: «quiero que mi área se venda»). -->
+    <footer class="pie-area" aria-label="Área responsable del panel">
+      <div class="pie-marca">
+        <span class="pie-logo" aria-hidden="true">GEA</span>
+        <div class="pie-txt"><b>Jefatura de Planificación y Métricas</b><span>Datos confiables para decidir a tiempo · Campaña HFC · Claro Perú</span></div>
+      </div>
+      <div class="pie-der">Indicadores, análisis y tableros elaborados por <b>Planificación y Métricas</b> · GEA Internacional</div>
+    </footer>
+</div>
+  </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+<!-- MODAL expandir gráfico (Intervalos) -->
+<div id="chart-modal" onclick="if(event.target===this)closeChartModal()">
+  <div class="cmo-box">
+    <div class="cmo-header">
+      <span class="cmo-title" id="cmo-title"></span>
+      <button type="button" class="dias-btn" id="btn-modal-labels" onclick="toggleModalLabels()" title="Mostrar/ocultar los valores en cada punto/barra">🏷 Etiquetas</button>
+      <span class="cmo-hint">Esc o clic fuera para cerrar</span>
+      <button class="cmo-close" onclick="closeChartModal()">✕</button>
+    </div>
+    <div class="cmo-wrap"><canvas id="ch-modal"></canvas></div>
+  </div>
+</div>
+
+<!-- MODAL "Gráfico de Cumplimiento" (Diario) — js/28-grafico-cumplimiento.js -->
+<div id="modal-cumpl-dia" class="co-modal" onclick="if(event.target===this)cerrarModalCumplDia()">
+  <div class="cmo-box">
+    <div class="cmo-header">
+      <span class="cmo-title">📊 <span id="cumpl-tit">Gráfico de Cumplimiento</span> <small id="cumpl-sub" class="cmo-sub"></small></span>
+      <span class="cmo-hint">Esc o clic fuera para cerrar</span>
+      <button class="cmo-close" onclick="cerrarModalCumplDia()">✕</button>
+    </div>
+    <div class="cmo-toolbar">
+      <div class="cmo-tb-grp">
+        <span class="cmo-tb-lbl">KPI</span>
+        <div class="vista-tgl" id="cumpl-kpi-tgl">
+          <button class="on" data-kpi="trafico" onclick="setCumplDiaKpi('trafico',this)">Tráf. Dim. vs Recibidas</button>
+          <button data-kpi="tmg" onclick="setCumplDiaKpi('tmg',this)">TMG Real vs Dim.</button>
+          <button data-kpi="agentes" onclick="setCumplDiaKpi('agentes',this)">Agentes Real vs Dim.</button>
+        </div>
+      </div>
+      <div class="cmo-tb-grp">
+        <span class="cmo-tb-lbl">Fecha</span>
+        <div class="vista-tgl" id="cumpl-fh-tgl">
+          <button data-fh="si" onclick="setCumplDiaFechaHoy('si',this)">Día actual</button>
+          <button class="on" data-fh="no" onclick="setCumplDiaFechaHoy('no',this)">Hasta el día anterior</button>
+        </div>
+      </div>
+    </div>
+    <div class="cmo-chips" id="cumpl-chips" role="group" aria-label="Qué ver en el gráfico"></div>
+    <div class="cmo-wrap"><canvas id="ch-cumpl-dia-modal"></canvas></div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+<script src="js/01-core.js?v=118"></script>
+<script src="js/02-engine.js?v=83"></script>
+<script src="js/03-data-mock.js?v=78"></script>
+<script src="js/04-diario.js?v=89"></script>
+<script src="js/05-intervalos.js?v=78"></script>
+<script src="js/06-export.js?v=89"></script>
+<script src="js/08-supervisores-mock.js?v=77"></script>
+<script src="js/09-supervisores.js?v=89"></script>
+<script src="js/10-columnas.js?v=93"></script>
+<script src="js/11-remote.js?v=82"></script>
+<script src="js/12-charts-intervalos.js?v=79"></script>
+<script src="js/13-tv.js?v=77"></script>
+<script src="js/14-asesores.js?v=107"></script>
+<script src="js/16-tooltips.js?v=88"></script>
+<script src="js/17-tarjetas.js?v=2"></script>
+<script src="js/18-tnps-asesores.js?v=1"></script>
+<script src="js/23-filtro-fila-diario.js?v=1"></script>
+<script src="js/26-grafico-cumplimiento.js?v=1"></script>
+<script src="js/20-agentes-comun.js?v=1"></script>
+<script src="js/07-init.js?v=86"></script>
+<script src="js/login-mascota.js?v=3"></script>
+<script>/* Red de seguridad: si js/login-mascota.js no cargó, el formulario del login se muestra igual. */
+setTimeout(function(){ if(!window.__glMascota){ var s=document.querySelector('.gl-shell.gl-cerrado'); if(s) s.classList.remove('gl-cerrado'); } }, 2500);</script>
+</body>
+</html>

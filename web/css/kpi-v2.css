@@ -1,0 +1,76 @@
+/* ===================== Tarjetas KPI «v2» (HFC, 2026-10-08) =====================
+   Estilo propio de HFC (referencia: tarjetas del backoffice), para Diario e Intervalos (contenedor .kpi-strip.kpi-v2).
+   Cada tarjeta va suelta con borde, franja de color a la izquierda y un ícono en recuadro. Toma el color de su estado
+   (en meta / atención / fuera de meta). Al pasar el mouse sube, el borde toma su color, la cifra crece y las demás se
+   atenúan. «Reducir movimiento» apaga el desplazamiento. */
+.kpi-strip.kpi-v2{
+  gap:12px;background:transparent;border:0;border-radius:0;overflow:visible;
+  grid-template-columns:repeat(auto-fill,minmax(205px,1fr));
+}
+.kpi-v2 .kpi-card{
+  --kc:var(--accent2-ink);
+  position:relative;overflow:hidden;min-width:0;cursor:default;
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  padding:13px 15px 12px 18px;box-shadow:0 1px 2px rgba(0,0,0,.18);
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease, opacity .18s ease, background .18s ease;
+}
+.kpi-v2 .kpi-card:has(.kv.v), .kpi-v2 .kpi-card:has(.kv.verde){--kc:var(--good)}
+.kpi-v2 .kpi-card:has(.kv.a){--kc:var(--warn)}
+.kpi-v2 .kpi-card:has(.kv.r), .kpi-v2 .kpi-card:has(.kv.rojo){--kc:var(--bad)}
+.kpi-v2 .kpi-card:has(.kv.cat){--kc:var(--accent-ink)}
+.kpi-v2 .kpi-card::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--kc);transition:width .18s ease;
+}
+.kpi-v2 .kpi-card:hover{
+  transform:translateY(-4px);z-index:2;background:var(--surface);
+  border-color:color-mix(in srgb,var(--kc) 60%,transparent);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--kc) 16%,transparent), 0 14px 30px rgba(0,0,0,.28);
+}
+.kpi-v2 .kpi-card:hover::before{width:5px}
+.kpi-v2:hover .kpi-card:not(:hover){opacity:.6}
+
+/* encabezado: ícono en recuadro + rótulo en tipografía normal (no mono/mayúsculas como Rete Fija) */
+.kpi-v2 .kpi-card .kl{
+  font-family:var(--sans);font-size:12.5px;font-weight:650;letter-spacing:.005em;text-transform:none;
+  color:var(--text);margin-bottom:8px;gap:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.kpi-v2 .kpi-card .ico{
+  width:26px;height:26px;border-radius:8px;flex:0 0 26px;display:grid;place-items:center;opacity:1;font-size:13px;
+  background:color-mix(in srgb,var(--kc) 16%,transparent);color:var(--kc);
+}
+.kpi-v2 .kpi-card .ico svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* cifra: sans con números tabulares; crece al pasar el mouse (se redibuja nítida, no se escala) */
+.kpi-v2 .kpi-card .kv{
+  font-family:var(--sans);font-size:26px;font-weight:700;letter-spacing:-.5px;line-height:1.1;
+  font-variant-numeric:tabular-nums;transition:font-size .18s ease, text-shadow .18s ease;
+}
+.kpi-v2 .kpi-card:hover .kv{font-size:28.5px;text-shadow:0 0 18px color-mix(in srgb,var(--kc) 35%,transparent)}
+.kpi-v2 .kpi-card .ks{font-family:var(--sans);font-size:11.5px;margin-top:4px}
+
+@media (prefers-reduced-motion:reduce){ .kpi-v2 .kpi-card,.kpi-v2 .kpi-card:hover{transform:none} }
+@media (max-width:640px){ .kpi-strip.kpi-v2{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px} .kpi-v2 .kpi-card .kv{font-size:22px} .kpi-v2 .kpi-card:hover .kv{font-size:22px} }
+
+/* ===================== Tarjeta TNPS completa y «Personalizar tarjetas» (17-tarjetas.js, 2026-10-08) ===================== */
+.kpi-tools{display:flex;justify-content:flex-end;margin:-4px 0 8px}
+.kpi-tools .dias-btn{font-size:12px}
+/* La tarjeta TNPS ocupa dos columnas: lleva la barra Promotores / Neutros / Detractores y su leyenda. */
+.kpi-v2 .kpi-card.kpi-ancha{grid-column:span 2}
+.tnps-barra{display:flex;height:12px;border-radius:999px;overflow:hidden;background:var(--surface3);margin:9px 0 8px}
+.tnps-barra span{display:block;height:100%;transition:width .4s ease}
+.tnps-barra .p{background:var(--good)} .tnps-barra .n{background:var(--dim)} .tnps-barra .d{background:var(--bad)}
+.tnps-leyenda{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--muted)}
+.tnps-leyenda span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.tnps-leyenda b{color:var(--text);font-weight:700}
+.tnps-leyenda i{width:9px;height:9px;border-radius:3px;display:inline-block}
+.tnps-leyenda .p i{background:var(--good)} .tnps-leyenda .n i{background:var(--dim)} .tnps-leyenda .d i{background:var(--bad)}
+.tnps-pie{margin-top:6px;font-size:11.5px;color:var(--muted)}
+.tnps-pie b{color:var(--text)}
+/* Panel: cada fila con casilla, nombre y botones ↑ ↓ */
+.tarj-item{cursor:default}
+.tarj-item span{flex:1}
+.tarj-mover{width:26px;height:24px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;font-size:12px;line-height:1}
+.tarj-mover:hover:not(:disabled){border-color:var(--accent);color:var(--accent-ink)}
+.tarj-mover:disabled{opacity:.3;cursor:default}
+.tarj-ayuda{font-size:11.5px;color:var(--muted);margin:0 0 10px;line-height:1.4}
+@media (max-width:640px){ .kpi-v2 .kpi-card.kpi-ancha{grid-column:1 / -1} }

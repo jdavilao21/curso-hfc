@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(npx playwright test:*)",
+      "Bash(python -m pytest:*)"
+    ],
+    "deny": [
+      "Bash(git push:*)",
+      "Read(/etc/curso-hfc/**)",
+      "Read(./**/.env)",
+      "Bash(sqlcmd:*-U sa*)"
+    ]
+  }
+}
