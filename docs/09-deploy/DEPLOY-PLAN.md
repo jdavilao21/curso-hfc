@@ -1,8 +1,8 @@
 # Deploy Plan — Panel de Gestión HFC (demo del curso)
 
-Fecha: 2026-10-26
-Estado: GENERADO y verificado en local (CI simulado con SQL Server en Docker); EXECUTE pendiente
-de las autorizaciones de la sección «Autorizaciones».
+Fecha: 2026-10-26 · Última actualización: **27-oct-2026**
+Estado: EJECUTADO. A1–A6 hechos y pipeline completo en verde desde el 27-oct-2026
+(ver «Registro de ejecución y verificación»).
 
 Consume: código, tests ([`07-testing`](../07-testing/README.md)) y
 [`SECURITY-REPORT`](../08-seguridad/SECURITY-REPORT.md).
@@ -42,6 +42,34 @@ Regla: ningún secreto de producción entra a GitHub. CI nunca ve la base del VP
 Sin infraestructura nueva (PRD): Nginx + Certbot + systemd + SQL Server existentes. Se agregan:
 el usuario de sistema `curso-hfc` (corre la API), el usuario `deploy-curso` (recibe el deploy),
 el servicio `curso-hfc-api` (puerto 8010), el sitio Nginx `curso-hfc.metadatape.com` y la base `BD_CURSO_HFC`.
+
+### Acciones de GitHub (✅ 27-oct-2026)
+
+El workflow [`ci-cd.yml`](../../.github/workflows/ci-cd.yml) usa solo acciones oficiales de la
+organización `actions/`, fijadas por versión mayor. Todas corren en **Node 24**:
+
+| Acción | Jobs | Antes | Ahora | Runtime (`runs.using` del `action.yml`) |
+|---|---|---|---|---|
+| `actions/checkout` | `quality`, `e2e` | `v4` | `v7` | `node24` |
+| `actions/setup-python` | `quality`, `e2e` | `v5` | `v7` | `node24` |
+| `actions/setup-node` | `quality`, `e2e` | `v4` | `v7` | `node24` |
+| `actions/upload-artifact` | `e2e` (solo si falla) | `v4` | `v7` | `node24` |
+
+Commit `952a814`. Los jobs `deploy` y `smoke` no usan acciones: hacen `ssh` y `curl`.
+
+**Por qué:** GitHub marcó Node 20 como obsoleto y ya forzaba esas acciones a Node 24, con un aviso en
+cada run (aviso visto en el run 40453178208). `upload-artifact@v4` no salía en el aviso porque solo
+corre cuando falla un E2E, pero también usaba Node 20.
+
+**Cambios incompatibles revisados** (notas de versión de v5 a v7, ninguno nos afecta):
+- `setup-node` v5+ activa la caché de npm solo si `package.json` declara `packageManager`.
+  El nuestro no lo declara: el comportamiento no cambia.
+- `checkout` v6 guarda las credenciales en un archivo aparte; ningún paso las lee.
+- `upload-artifact` v7 agrega `archive: false` (opcional) y pasa a ESM; con `path:` de carpeta funciona igual.
+- Todas piden runner ≥ 2.327.1: los runners de GitHub (`ubuntu-24.04`) ya lo cumplen.
+
+**Para revisar en el futuro:** el aviso «Node.js NN is deprecated» en las *Annotations* del run, o
+`gh api repos/actions/<acción>/releases/latest -q .tag_name`. Revertir: `git revert 952a814`.
 
 ### Entornos
 - **CI**: runner de GitHub + SQL Server 2022 en contenedor, API en el mismo runner (`SERVIR_WEB=1`).
@@ -172,3 +200,4 @@ Pasos que **cambian el VPS de producción** y que se ejecutan solo con el OK exp
 | 2026-10-27 | A5–A6: `terminar-vps.sh` | ✅ cabeceras repetidas en el `location .html` (`nginx -t` ok), llave con comando forzado, 3 secrets en `production`, comando arbitrario rechazado, primer deploy manual y `DEPLOY_ENABLED=true` |
 | 2026-10-27 | Primer pipeline completo (run 40453178208, commit `22f85a0`) | ✅ quality 25 s · e2e 1 min 40 s · deploy por SSH 11 s · smoke 5 s; el VPS quedó en `22f85a0` |
 | 2026-10-27 | Login en producción con los 3 usuarios demo | ✅ Administrador, Supervisor y Cliente Claro |
+| 2026-10-27 | Acciones a `v7` / Node 24 (run 40454151335, commit `952a814`) | ✅ quality 23 s · e2e 1 min 37 s · deploy 12 s · smoke 7 s; sin el aviso de Node 20. `upload-artifact@v7` no se ejecutó (solo corre si falla un E2E) |
