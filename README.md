@@ -28,16 +28,66 @@ ocupación por **día, franja de 30 minutos, supervisor y asesor**, con el mismo
 > documental (PRD → Design → Tech Design + ADRs → Backlog → Specs → Diagramas → Testing →
 > Seguridad → Deploy) y con datos inventados.
 
-## Qué hace
+## Para qué sirve
 
-- **Ingreso por perfiles**: Administrador, Supervisor y Cliente Claro. El cliente no recibe el
-  detalle por asesor, **ni siquiera llamando a la API directo**.
-- **Diario**: 9 tarjetas KPI con semáforo contra la meta y sparkline, tabla por día, período,
-  semana y rango.
-- **Intervalos**: los mismos KPI por franja de 30 minutos, con gráficos.
-- **Supervisores** y **Asesores**: producción, TNPS, CAT, TMG, horas y transferencias, con
-  filtros de supervisor, coordinador, condición laboral, modalidad y contrato.
-- **Excel** de cada tabla, firmado por el área. Temas noche, día, iOS y neón; **Modo TV**.
+En un call center, la operación se mide cada media hora: si entran más llamadas de las previstas,
+el nivel de servicio cae y los clientes abandonan; si un asesor tiene muchos detractores, el TNPS
+del mes se resiente. Este panel junta esas cifras en un solo lugar para que cada perfil tome
+decisiones con el mismo número:
+
+| Quién lo usa | Para qué |
+|---|---|
+| **Jefatura y analistas** (Administrador) | Ver si la operación cumple las metas del contrato y preparar los reportes del cliente sin armar Excel a mano. |
+| **Supervisores** | Detectar en qué franja se cayó el servicio y qué asesores necesitan coaching (cuartil crítico de TNPS, cortes, transferencias). |
+| **Cliente Claro** | Seguir el cumplimiento de la campaña con totales por supervisor, sin ver datos personales de los asesores. |
+
+Indicadores principales:
+
+| KPI | Qué mide |
+|---|---|
+| **% Nivel de servicio** | Llamadas atendidas dentro del umbral de tiempo (meta ≥ 85 %). |
+| **% Atención** | Llamadas atendidas sobre recibidas; el resto son abandonos (meta ≥ 95 %). |
+| **TNPS** | % de promotores menos % de detractores en la encuesta posterior a la llamada. |
+| **TMG** | Tiempo medio de gestión por llamada, comparado con el dimensionado. |
+| **% Ocupación** | Tiempo hablando sobre tiempo productivo de los asesores. |
+| **% CAT** | Llamadas cortadas por el asesor (corte agente). |
+
+## Recorrido por el sistema
+
+Capturas de la demo, con datos ficticios.
+
+**1. Ingreso.** Se hace clic en la mascota y se entra con usuario y contraseña. El servidor
+decide qué puede ver cada perfil.
+
+![Pantalla de ingreso](docs/capturas/01-ingreso.png)
+
+**2. Diario.** 9 tarjetas con el resultado del período: color según la meta, mini-gráfico de
+tendencia y variación del último día contra el anterior. Se filtra por período, semana o rango (7, 14 o 31 días)
+y debajo está la tabla día por día.
+
+![Pestaña Diario](docs/capturas/02-diario.png)
+
+**3. Intervalos.** Los mismos indicadores en franjas de 30 minutos para una fecha, con gráficos de
+nivel de servicio, llamadas por franja y TMG real contra el dimensionado. Sirve para ver a qué hora
+faltó gente.
+
+![Pestaña Intervalos](docs/capturas/03-intervalos.png)
+
+**4. Asesores.** Producción, TNPS, CAT, TMG y transferencias por asesor, con filtros de
+supervisor, coordinador, condición laboral, modalidad y contrato. La tarjeta **Q4 · Crítico**
+muestra cuántos asesores concentran los detractores. La pestaña **Supervisores** muestra lo mismo
+agregado por equipo.
+
+![Pestaña Asesores](docs/capturas/05-asesores.png)
+
+**5. Vista del cliente.** El perfil Cliente Claro no tiene la pestaña Asesores y solo recibe
+totales por supervisor. La restricción la aplica la API, así que tampoco se puede saltar desde el
+navegador.
+
+![Vista del perfil Cliente Claro](docs/capturas/06-cliente.png)
+
+Además, cada tabla se descarga en **Excel** firmado por el área, y hay temas noche, día, iOS y
+neón y un **Modo TV** con letra grande para pantallas.
 
 ## Arquitectura
 
