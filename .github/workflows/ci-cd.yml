@@ -128,7 +128,7 @@ jobs:
           install -m 700 -d ~/.ssh
           echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519 && chmod 600 ~/.ssh/id_ed25519
           echo "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
-      - name: Desplegar (comando forzado en el servidor: deploy/desplegar.sh)
+      - name: "Desplegar (comando forzado en el servidor: deploy/desplegar.sh)"
         run: ssh -o BatchMode=yes deploy-curso@${{ secrets.DEPLOY_HOST }} "${{ github.sha }}"
 
   smoke:
