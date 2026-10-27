@@ -100,8 +100,9 @@ chmod o+x /opt/curso-hfc && chmod -R o+rX /opt/curso-hfc/web     # Nginx (www-da
 sudo -u deploy-curso python3 -m venv /opt/curso-hfc/venv
 sudo -u deploy-curso /opt/curso-hfc/venv/bin/pip install -r /opt/curso-hfc/api/requirements.txt
 
-# 4. Base de datos (clave de sa a mano, una sola vez)
-sqlcmd -S 127.0.0.1 -U sa -C -i /opt/curso-hfc/sql/01_crear_bd.sql -v CLAVE_APP='…' CLAVE_CARGA='…'
+# 4. Base de datos: Jose corre esto y escribe la clave de sa sin que se muestre ni se guarde
+#    (lee las claves de los logins de /etc/curso-hfc/*.env, que deben existir antes: paso 5)
+sudo /opt/curso-hfc/deploy/crear-bd.sh
 
 # 5. Secretos
 install -d -m 750 -o root -g root /etc/curso-hfc
@@ -162,3 +163,4 @@ Pasos que **cambian el VPS de producción** y que se ejecutan solo con el OK exp
 | 2026-10-26 | `pip-audit` / `npm audit` | 0 / 0 vulnerabilidades |
 | 2026-10-26 | Primer run de GitHub Actions | ❌ YAML inválido: `name:` con «: » sin comillas en el paso de deploy |
 | 2026-10-26 | Segundo run (corregido) | ✅ quality y e2e (25/25 contra SQL Server en contenedor); deploy y smoke omitidos (`DEPLOY_ENABLED` sin activar) |
+| 2026-10-26 | `deploy/crear-bd.sh` probado contra SQL Server en Docker con las claves reales de `/etc/curso-hfc` | ✅ crea la base y ambos logins entran |
