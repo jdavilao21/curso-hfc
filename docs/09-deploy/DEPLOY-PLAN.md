@@ -143,8 +143,8 @@ Pasos que **cambian el VPS de producción** y que se ejecutan solo con el OK exp
 
 | # | Acción | Estado |
 |---|---|---|
-| A1 | Crear el repo público `jdavilao21/curso-hfc` y hacer push | Pendiente |
-| A2 | Registro DNS `curso-hfc` | Pendiente (Jose) |
+| A1 | Crear el repo público `jdavilao21/curso-hfc` y hacer push | ✅ Hecho (2026-10-26) |
+| A2 | Registro DNS `curso-hfc` | ✅ Hecho por Jose (resuelve a la IP del VPS) |
 | A3 | Crear `BD_CURSO_HFC` y sus logins (clave de `sa`) | Pendiente (Jose) |
 | A4 | Usuarios `curso-hfc` / `deploy-curso`, sudoers, servicio systemd | Pendiente |
 | A5 | Sitio Nginx + Certbot | Pendiente |
@@ -160,3 +160,5 @@ Pasos que **cambian el VPS de producción** y que se ejecutan solo con el OK exp
 | 2026-10-26 | Permisos: `INSERT` con `curso_hfc_app` | Rechazado (`Msg 229`) |
 | 2026-10-26 | `CHECK CK_KPI_ATENDIDAS` con una fila incoherente | Rechazado (`Msg 547`) |
 | 2026-10-26 | `pip-audit` / `npm audit` | 0 / 0 vulnerabilidades |
+| 2026-10-26 | Primer run de GitHub Actions | ❌ YAML inválido: `name:` con «: » sin comillas en el paso de deploy |
+| 2026-10-26 | Segundo run (corregido) | ✅ quality y e2e (25/25 contra SQL Server en contenedor); deploy y smoke omitidos (`DEPLOY_ENABLED` sin activar) |
