@@ -7,6 +7,8 @@
 
 **Demo:** https://curso-hfc.metadatape.com · datos **ficticios**
 
+**Entrega del curso:** [`ENTREGA.md`](ENTREGA.md) — mensaje al profesor con los enlaces, los usuarios demo y los 9 entregables.
+
 | Perfil | Usuario | Contraseña | Qué ve |
 |---|---|---|---|
 | Administrador | `ADMIN.DEMO` | `Admin#Hfc2026` | todo |
