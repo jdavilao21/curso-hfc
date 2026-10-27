@@ -23,4 +23,4 @@ Cada ítem de [`BACKLOG.md`](../04-backlog/BACKLOG.md) se convierte en **un** ch
 | #3 Login y token | [`2026-10-26-login-token`](../../openspec/changes/archive/2026-10-26-login-token/) | [`acceso`](../../openspec/specs/acceso/spec.md) |
 | #4 Endpoints de datos | [`2026-10-26-endpoints-datos-autorizacion`](../../openspec/changes/archive/2026-10-26-endpoints-datos-autorizacion/) | [`api-datos`](../../openspec/specs/api-datos/spec.md) |
 | #5 Front ↔ API | [`2026-10-26-front-conectado-api`](../../openspec/changes/archive/2026-10-26-front-conectado-api/) | [`tablero`](../../openspec/specs/tablero/spec.md) |
-| #6 CI/CD y despliegue | [`cicd-despliegue`](../../openspec/changes/cicd-despliegue/) — **activo**: falta el primer deploy (tarea 3.1) | `despliegue` se sincroniza al archivar |
+| #6 CI/CD y despliegue | [`2026-10-27-cicd-despliegue`](../../openspec/changes/archive/2026-10-27-cicd-despliegue/) | [`despliegue`](../../openspec/specs/despliegue/spec.md) |

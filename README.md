@@ -7,6 +7,15 @@
 
 **Demo:** https://curso-hfc.metadatape.com · datos **ficticios**
 
+| Perfil | Usuario | Contraseña | Qué ve |
+|---|---|---|---|
+| Administrador | `ADMIN.DEMO` | `Admin#Hfc2026` | todo |
+| Supervisor | `SUP.DEMO` | `Super#Hfc2026` | todo, con detalle por asesor |
+| Cliente Claro | `CLIENTE.DEMO` | `Cliente#Hfc2026` | totales por supervisor, **sin** detalle por asesor |
+
+Las contraseñas son públicas a propósito: la demo solo lee datos inventados y la base se regenera
+en cada deploy. Tras 5 intentos fallidos en 15 minutos, el login se bloquea un rato (`429`).
+
 En la campaña HFC (atención inbound de Claro Perú, operada por GEA Internacional), los
 indicadores se armaban a mano en Excel: llegaban a media mañana y dos analistas podían dar dos
 cifras distintas del mismo TNPS. Este panel muestra el nivel de servicio, el TMG, el TNPS y la
@@ -93,7 +102,7 @@ web/        front estático (index.html, css/, js/, assets/)
 api/        FastAPI: main.py · auth.py · db.py · tests/
 sql/        01_crear_bd.sql · 02_esquema.sql · semilla.py
 tests/      Playwright E2E
-deploy/     desplegar.sh · curso-hfc-api.service · nginx-curso-hfc.conf
+deploy/     desplegar.sh · curso-hfc-api.service · nginx-curso-hfc.conf · crear-bd.sh · preparar-vps.sh · terminar-vps.sh
 docs/       pipeline 01…09          openspec/   specs vigentes y changes
 .claude/    agentes del proyecto     skills/     skill agregar-kpi-hfc
 ```

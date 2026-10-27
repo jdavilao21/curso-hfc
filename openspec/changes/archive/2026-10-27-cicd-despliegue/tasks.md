@@ -11,4 +11,4 @@
 
 ## 3. Verificación
 
-- [ ] 3.1 Primer deploy y smoke en verde (registro en DEPLOY-PLAN)
+- [x] 3.1 Primer deploy y smoke en verde (registro en DEPLOY-PLAN)

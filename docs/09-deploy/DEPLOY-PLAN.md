@@ -84,7 +84,7 @@ o renombrar columnas) exige un `DROP` explícito en el script y un ADR.
 
 ## Preparación única en el VPS (una vez, a mano, con root)
 
-Automatizada en [`deploy/crear-bd.sh`](../../deploy/crear-bd.sh) (A3) y [`deploy/preparar-vps.sh`](../../deploy/preparar-vps.sh) (A4–A6). Los corre Jose: crear usuarios y permisos `sudo` en el servidor de producción es una decisión suya, no del agente. Detalle de lo que hacen:
+Automatizada en [`deploy/crear-bd.sh`](../../deploy/crear-bd.sh) (A3) y [`deploy/preparar-vps.sh`](../../deploy/preparar-vps.sh) (A4–A6). `preparar-vps.sh` se cortó después de Certbot; lo que faltaba de A5–A6 lo completó [`deploy/terminar-vps.sh`](../../deploy/terminar-vps.sh). Los corre Jose: crear usuarios y permisos `sudo` en el servidor de producción es una decisión suya, no del agente. Detalle de lo que hacen:
 
 ```bash
 # 1. DNS: registro A curso-hfc.metadatape.com → IP del VPS (lo crea Jose en su proveedor)
@@ -148,10 +148,10 @@ Pasos que **cambian el VPS de producción** y que se ejecutan solo con el OK exp
 |---|---|---|
 | A1 | Crear el repo público `jdavilao21/curso-hfc` y hacer push | ✅ Hecho (2026-10-26) |
 | A2 | Registro DNS `curso-hfc` | ✅ Hecho por Jose (resuelve a la IP del VPS) |
-| A3 | Crear `BD_CURSO_HFC` y sus logins (clave de `sa`) | Pendiente (Jose) |
-| A4 | Usuarios `curso-hfc` / `deploy-curso`, sudoers, servicio systemd | Pendiente |
-| A5 | Sitio Nginx + Certbot | Pendiente |
-| A6 | Llave de deploy y secrets del environment `production` | Pendiente |
+| A3 | Crear `BD_CURSO_HFC` y sus logins (clave de `sa`) | ✅ Hecho por Jose con `crear-bd.sh` (2026-10-27) |
+| A4 | Usuarios `curso-hfc` / `deploy-curso`, sudoers, servicio systemd | ✅ Hecho por Jose con `preparar-vps.sh` (2026-10-27) |
+| A5 | Sitio Nginx + Certbot | ✅ Hecho por Jose con `preparar-vps.sh`; cabeceras del `.html` con `terminar-vps.sh` (2026-10-27) |
+| A6 | Llave de deploy y secrets del environment `production` | ✅ Hecho por Jose con `terminar-vps.sh` (2026-10-27) |
 
 ## Registro de ejecución y verificación
 
@@ -166,3 +166,9 @@ Pasos que **cambian el VPS de producción** y que se ejecutan solo con el OK exp
 | 2026-10-26 | Primer run de GitHub Actions | ❌ YAML inválido: `name:` con «: » sin comillas en el paso de deploy |
 | 2026-10-26 | Segundo run (corregido) | ✅ quality y e2e (25/25 contra SQL Server en contenedor); deploy y smoke omitidos (`DEPLOY_ENABLED` sin activar) |
 | 2026-10-26 | `deploy/crear-bd.sh` probado contra SQL Server en Docker con las claves reales de `/etc/curso-hfc` | ✅ crea la base y ambos logins entran |
+| 2026-10-27 | A3 en el VPS: `crear-bd.sh` | ✅ base creada; `curso_hfc_app` solo con `SELECT` y sin acceso a las bases de producción |
+| 2026-10-27 | A4–A5: `preparar-vps.sh` | ✅ usuarios, sudoers, servicio `curso-hfc-api` activo, semilla, sitio y certificado; ⚠️ el script se cortó después de Certbot |
+| 2026-10-27 | Revisión del sitio con `curl --resolve` a 127.0.0.1 | ✅ health, CSP, 301 http→https, 401 sin token, 404 en `.git`/`sql`/`api`; el cliente recibe 182 filas sin nombres de asesor. ❌ las páginas `.html` no traían HSTS, Referrer-Policy ni Permissions-Policy (un `add_header` dentro del `location` anula los del `server`) |
+| 2026-10-27 | A5–A6: `terminar-vps.sh` | ✅ cabeceras repetidas en el `location .html` (`nginx -t` ok), llave con comando forzado, 3 secrets en `production`, comando arbitrario rechazado, primer deploy manual y `DEPLOY_ENABLED=true` |
+| 2026-10-27 | Primer pipeline completo (run 40453178208, commit `22f85a0`) | ✅ quality 25 s · e2e 1 min 40 s · deploy por SSH 11 s · smoke 5 s; el VPS quedó en `22f85a0` |
+| 2026-10-27 | Login en producción con los 3 usuarios demo | ✅ Administrador, Supervisor y Cliente Claro |
